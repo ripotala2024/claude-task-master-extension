@@ -718,6 +718,22 @@ function generateTaskDetailsHtml(task: Task, parentTaskId?: string): string {
         }
     };
 
+    // Helper function to get status label in Chinese
+    const getStatusLabel = (status: string) => {
+        switch (status) {
+            case 'completed': 
+            case 'done': return '已完成';
+            case 'in-progress': return '进行中';
+            case 'blocked': return '已阻塞';
+            case 'cancelled': return '已取消';
+            case 'deferred': return '已延期';
+            case 'review': return '审核中';
+            case 'todo': 
+            case 'pending': return '待办';
+            default: return status.replace('-', ' ');
+        }
+    };
+
     // Helper function to get priority color and icon
     const getPriorityInfo = (priority: string) => {
         switch (priority?.toLowerCase()) {
@@ -1518,7 +1534,7 @@ function generateTaskDetailsHtml(task: Task, parentTaskId?: string): string {
             ${taskDisplayInfo.parentInfo ? `<div class="parent-info">${taskDisplayInfo.parentInfo}</div>` : ''}
             <div class="task-meta">
                 <span class="status-badge status-${task.status}">
-                    ${getStatusIcon(task.status)} ${task.status.replace('-', ' ')}
+                    ${getStatusIcon(task.status)} ${getStatusLabel(task.status)}
                 </span>
                 ${isSubtask ? '' : `
                 <span class="priority-badge">
@@ -1582,7 +1598,7 @@ function generateTaskDetailsHtml(task: Task, parentTaskId?: string): string {
                                 <span class="subtask-id">编号：${subtask.id}</span>
                                 <span class="subtask-title">${subtask.title}</span>
                             </div>
-                            <span class="subtask-status ${subtask.status}">${subtask.status}</span>
+                            <span class="subtask-status ${subtask.status}">${getStatusLabel(subtask.status)}</span>
                         </div>
                     </li>
                 `).join('')}
@@ -1603,7 +1619,7 @@ function generateTaskDetailsHtml(task: Task, parentTaskId?: string): string {
                 <div class="metadata-item">
                     <div class="metadata-label">状态</div>
                     <div class="metadata-value status-${task.status}">
-                        ${getStatusIcon(task.status)} ${task.status.replace('-', ' ')}
+                        ${getStatusIcon(task.status)} ${getStatusLabel(task.status)}
                     </div>
                 </div>
                 ${!isSubtask ? `
@@ -2217,10 +2233,10 @@ async function createTaskEditForm(task: Task): Promise<TaskUpdateData | undefine
     // Step 4: Status
     const currentStatus = task.status || 'todo';
     const statusOptions = [
-        { label: 'todo', detail: 'Ready to work on' },
-        { label: 'in-progress', detail: 'Currently being worked on' },
-        { label: 'completed', detail: 'Task is finished' },
-        { label: 'blocked', detail: 'Cannot proceed' }
+        { label: 'todo', detail: '准备开始工作' },
+        { label: 'in-progress', detail: '当前正在进行' },
+        { label: 'completed', detail: '任务已完成' },
+        { label: 'blocked', detail: '无法继续进行' }
     ];
     
     const status = await vscode.window.showQuickPick(
