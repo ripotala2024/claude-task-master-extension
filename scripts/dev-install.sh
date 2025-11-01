@@ -4,10 +4,18 @@
 # This script compiles, packages, and installs the extension automatically
 
 EXTENSION_NAME="claude-task-master-extension"
-VSIX_FILE="$EXTENSION_NAME-1.2.1.vsix"
+VSIX_FILE="$EXTENSION_NAME-1.3.0.vsix"
+
+# Get the script directory and project root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 echo "🚀 Starting automatic extension rebuild and install..."
+echo "📁 Project root: $PROJECT_ROOT"
 echo ""
+
+# Change to project root directory
+cd "$PROJECT_ROOT" || exit 1
 
 # Step 1: Compile TypeScript
 echo "📦 Step 1: Compiling TypeScript..."

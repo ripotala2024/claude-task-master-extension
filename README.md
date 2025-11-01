@@ -1,10 +1,10 @@
 # Claude Task Master Visual Interface
 
-[![Version](https://img.shields.io/badge/version-1.2.2-blue.svg)](https://marketplace.visualstudio.com/items?itemName=DevDreed.claude-task-master-extension)
+[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](https://marketplace.visualstudio.com/items?itemName=DevDreed.claude-task-master-extension)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![VS Code](https://img.shields.io/badge/VS%20Code-1.70.0+-orange.svg)](https://code.visualstudio.com/)
 [![Tests](https://img.shields.io/badge/tests-130%20passing-brightgreen.svg)](TEST_COVERAGE.md)
-[![Task Master](https://img.shields.io/badge/Task%20Master-v0.17.0%20Compatible-green.svg)](https://github.com/eyaltoledano/claude-task-master)
+[![Task Master](https://img.shields.io/badge/Task%20Master-v0.17.0--v0.31.0%20Compatible-green.svg)](https://github.com/eyaltoledano/claude-task-master)
 
 A VS Code/Cursor extension that provides a rich visual interface for [task-master-ai](https://github.com/eyaltoledano/claude-task-master) projects. Transform your task management workflow with intuitive tree views, progress tracking, and seamless IDE integration.
 
@@ -16,7 +16,7 @@ A VS Code/Cursor extension that provides a rich visual interface for [task-maste
 
 ### 🏷️ **Multi-Context Tag Management** (v1.2.0+)
 
-- **Tagged Task System**: Full support for Task Master v0.17.0's tagged format for multi-context project management
+- **Tagged Task System**: Full support for Task Master v0.17.0+ tagged format for multi-context project management (compatible up to v0.31.0)
 - **Tag Status Bar**: Real-time current tag indicator with click-to-switch functionality
 - **Tag Management Commands**: Create, switch, delete, and list tags directly from VS Code command palette
 - **Silent Migration**: Automatic detection and handling of legacy format upgrades with zero breaking changes

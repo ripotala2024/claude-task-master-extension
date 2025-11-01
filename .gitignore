@@ -248,3 +248,5 @@ logs
 # OS specific
 # Task files
 scripts/generate-vscodeignore.js
+
+.specstory/

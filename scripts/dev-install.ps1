@@ -4,10 +4,18 @@
 # This script compiles, packages, and installs the extension automatically
 
 $EXTENSION_NAME = "claude-task-master-extension"
-$VSIX_FILE = "$EXTENSION_NAME-1.2.1.vsix"
+$VSIX_FILE = "$EXTENSION_NAME-1.3.0.vsix"
+
+# Get the script directory and project root
+$SCRIPT_DIR = Split-Path -Parent $MyInvocation.MyCommand.Path
+$PROJECT_ROOT = Split-Path -Parent $SCRIPT_DIR
 
 Write-Host "🚀 Starting automatic extension rebuild and install..." -ForegroundColor Green
+Write-Host "📁 Project root: $PROJECT_ROOT" -ForegroundColor Cyan
 Write-Host ""
+
+# Change to project root directory
+Set-Location $PROJECT_ROOT
 
 # Step 1: Compile TypeScript
 Write-Host "📦 Step 1: Compiling TypeScript..." -ForegroundColor Yellow

@@ -5,6 +5,25 @@ All notable changes to the Claude Task Master Visual Interface extension will be
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2025-11-01 - Task Master v0.31.0 Compatibility
+
+### 🎉 Enhanced Compatibility
+- **Extended Version Support**: Full compatibility with Task Master v0.17.0 through v0.31.0
+- **Relaxed Version Checking**: Updated version compatibility logic to support wider version ranges (up to 20 minor versions difference)
+- **Future-Proof Design**: Improved version detection mechanism for better forward compatibility
+
+### 🛠️ Technical Improvements
+- **Version Compatibility Algorithm**: Relaxed minor version difference threshold from 1 to 20
+- **Documentation Updates**: Updated all version references to reflect v0.31.0 compatibility
+- **Backward Compatibility**: Maintained full backward compatibility with existing v0.17.0+ projects
+
+### 📋 Documentation
+- **README Updates**: Updated version badges and compatibility statements
+- **Version Range**: Clearly documented supported version range (v0.17.0 - v0.31.0)
+- **Changelog Entry**: Added comprehensive changelog for version compatibility updates
+
+---
+
 ## [1.2.2] - 2025-06-16 - Bug Fixes and Stability Improvements
 
 ### 🔧 Bug Fixes

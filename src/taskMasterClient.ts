@@ -1669,8 +1669,9 @@ export class TaskMasterClient {
             };
         }
 
-        // Check for minor version differences
-        if (Math.abs(cliVersionParts[1]! - mcpVersionParts[1]!) > 1) {
+        // Check for minor version differences (relaxed to support wider version range)
+        // Allow up to 20 minor version difference to support 0.17.0 to 0.31.0+ compatibility
+        if (Math.abs(cliVersionParts[1]! - mcpVersionParts[1]!) > 20) {
             return {
                 compatible: false,
                 cliVersion,
