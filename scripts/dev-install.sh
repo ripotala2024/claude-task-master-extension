@@ -4,7 +4,7 @@
 # This script compiles, packages, and installs the extension automatically
 
 EXTENSION_NAME="claude-task-master-extension"
-VSIX_FILE="$EXTENSION_NAME-1.3.0.vsix"
+VSIX_FILE="$EXTENSION_NAME-1.3.2.vsix"
 
 # Get the script directory and project root
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

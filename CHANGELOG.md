@@ -5,6 +5,74 @@ All notable changes to the Claude Task Master Visual Interface extension will be
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.2] - 2025-11-01 - 完整界面中文化
+
+### 🌏 全面中文化（最终版本）
+
+#### WebView 详情页面
+- **任务详情页面**: 所有 HTML webview 中的英文文本已翻译
+- **章节标题**: "Description"→"描述", "Implementation Details"→"实现详情", "Subtasks"→"子任务", "Metadata"→"元数据", "Test Strategy"→"测试策略"
+- **按钮文本**: "Update Status"→"更新状态", "Expand Task"→"展开任务", "Add Subtask"→"添加子任务", "Start Working"→"开始工作"
+- **元数据标签**: "Status"→"状态", "Priority"→"优先级", "Type"→"类型", "Progress"→"进度", "Created"→"创建时间", "Last Updated"→"最后更新"
+
+#### 树视图面板
+- **进度概览**: "Progress Overview"→"进度概览", "Main Tasks"→"主任务", "All Items"→"全部项目"
+- **描述文本**: "Task IDs only"→"仅任务编号", "Including subtasks"→"包含子任务"
+- **面板分类**: "CURRENT WORK"→"当前工作", "NEXT TO WORK ON"→"下一步工作", "By Priority"→"按优先级", "By Category"→"按分类"
+- **状态标签**: "Todo"→"待办", "In Progress"→"进行中", "Completed"→"已完成", "Blocked"→"已阻塞", "Deferred"→"已延期", "Cancelled"→"已取消", "Review"→"审核中"
+- **优先级标签**: "Critical Priority"→"严重优先级", "High Priority"→"高优先级", "Medium Priority"→"中优先级", "Low Priority"→"低优先级"
+
+#### 标签管理
+- **切换标签**: 所有标签切换相关消息和选项已翻译
+- **创建标签**: 表单验证和提示消息已翻译
+- **删除标签**: 确认对话框和警告消息已翻译
+- **列出标签**: 标签列表显示和操作选项已翻译
+
+#### 任务操作
+- **状态选择器**: 所有状态选项和详细说明已翻译
+- **优先级选择器**: 所有优先级选项和详细说明已翻译
+- **删除确认**: 确认对话框和按钮文本已翻译
+- **依赖设置**: 依赖选择提示和描述已翻译
+
+### 🎯 翻译覆盖范围
+- ✅ package.json: 所有命令、配置和描述
+- ✅ extension.ts: 100+ 处用户消息和表单文本
+- ✅ taskProvider.ts: 所有树视图标签和分类
+- ✅ statusBar.ts: 状态栏标签指示器
+- ✅ tagUtils.ts: 标签工具函数消息
+- ✅ HTML webview: 任务详情页面所有文本
+
+### 🎨 用户体验
+- 完整的中文用户界面
+- 双语匹配逻辑（支持中英文标签）
+- 保持技术术语一致性
+- 优化中文显示体验
+
+---
+
+## [1.3.1] - 2025-11-01 - 完整中文化
+
+### 🌏 全面中文化
+- **UI 界面中文化**: 所有命令标题、菜单项和配置描述已翻译为中文
+- **用户消息中文化**: 所有提示、警告、错误消息和输入提示已翻译为中文
+- **状态标签中文化**: 任务状态、优先级和分类标签已翻译为中文
+- **工具提示中文化**: 所有悬停提示和描述文本已翻译为中文
+
+### 📝 翻译的主要区域
+- package.json: 30+ 个命令标题和配置描述
+- extension.ts: 60+ 个用户交互消息
+- taskProvider.ts: 任务状态、优先级和分类标签
+- statusBar.ts: 状态栏标签指示器
+- tagUtils.ts: 标签管理相关消息
+
+### 🎯 用户体验改进
+- 中文界面更适合中文用户使用
+- 保持技术术语的一致性（如 MCP、CLI、PRD）
+- 所有用户可见文本均已本地化
+- 保留开发日志为英文以便调试
+
+---
+
 ## [1.3.0] - 2025-11-01 - Task Master v0.31.0 Compatibility
 
 ### 🎉 Enhanced Compatibility

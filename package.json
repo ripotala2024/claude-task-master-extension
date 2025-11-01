@@ -2,7 +2,7 @@
   "name": "claude-task-master-extension",
   "displayName": "Claude Task Master Visual Interface",
   "description": "Visual VS Code/Cursor interface for task-master-ai projects - provides tree view, progress tracking, and task management UI",
-  "version": "1.3.0",
+  "version": "1.3.2",
   "publisher": "DevDreed",
   "license": "MIT",
   "icon": "images/claude-task-master-extension.png",
@@ -41,7 +41,7 @@
       "activitybar": [
         {
           "id": "claudeTaskMaster",
-          "title": "Claude Task Master",
+          "title": "任务管家",
           "icon": "images/claude-task-master-extension.png"
         }
       ]
@@ -50,7 +50,7 @@
       "claudeTaskMaster": [
         {
           "id": "claudeTaskMasterMainView",
-          "name": "Tasks",
+          "name": "任务",
           "when": "claudeTaskMaster.hasTaskmaster"
         }
       ]
@@ -58,132 +58,132 @@
     "commands": [
       {
         "command": "claudeTaskMaster.refresh",
-        "title": "Refresh",
+        "title": "刷新",
         "icon": "$(refresh)"
       },
       {
         "command": "claudeTaskMaster.search",
-        "title": "Search Tasks",
+        "title": "搜索任务",
         "icon": "$(search)"
       },
       {
         "command": "claudeTaskMaster.filterByStatus",
-        "title": "Filter by Status",
+        "title": "按状态筛选",
         "icon": "$(filter)"
       },
       {
         "command": "claudeTaskMaster.addTask",
-        "title": "Add Task",
+        "title": "添加任务",
         "icon": "$(add)"
       },
       {
         "command": "claudeTaskMaster.showTask",
-        "title": "Show Task Details",
+        "title": "显示任务详情",
         "icon": "$(eye)"
       },
       {
         "command": "claudeTaskMaster.setTaskStatus",
-        "title": "Set Task Status",
+        "title": "设置任务状态",
         "icon": "$(edit)"
       },
       {
         "command": "claudeTaskMaster.expandTask",
-        "title": "Expand Task",
+        "title": "展开任务",
         "icon": "$(unfold)"
       },
       {
         "command": "claudeTaskMaster.nextTask",
-        "title": "Show Next Task",
+        "title": "显示下一个任务",
         "icon": "$(arrow-right)"
       },
       {
         "command": "claudeTaskMaster.openPRD",
-        "title": "Open PRD",
+        "title": "打开需求文档",
         "icon": "$(file-text)"
       },
       {
         "command": "claudeTaskMaster.startWorking",
-        "title": "Start Working",
+        "title": "开始工作",
         "icon": "$(play)"
       },
       {
         "command": "claudeTaskMaster.addSubtask",
-        "title": "Add Subtask",
+        "title": "添加子任务",
         "icon": "$(plus)"
       },
       {
         "command": "claudeTaskMaster.editTask",
-        "title": "Edit Task",
+        "title": "编辑任务",
         "icon": "$(edit)"
       },
       {
         "command": "claudeTaskMaster.editTaskTitle",
-        "title": "Edit Title",
+        "title": "编辑标题",
         "icon": "$(pencil)"
       },
       {
         "command": "claudeTaskMaster.deleteTask",
-        "title": "Delete Task",
+        "title": "删除任务",
         "icon": "$(trash)"
       },
       {
         "command": "claudeTaskMaster.changePriority",
-        "title": "Change Priority",
+        "title": "更改优先级",
         "icon": "$(star)"
       },
       {
         "command": "claudeTaskMaster.setDependencies",
-        "title": "Set Dependencies",
+        "title": "设置依赖",
         "icon": "$(link)"
       },
       {
         "command": "claudeTaskMaster.copyTaskDetails",
-        "title": "Copy Task Details",
+        "title": "复制任务详情",
         "icon": "$(copy)"
       },
       {
         "command": "claudeTaskMaster.markCompleted",
-        "title": "Mark Completed",
+        "title": "标记为已完成",
         "icon": "$(check)"
       },
       {
         "command": "claudeTaskMaster.markInProgress",
-        "title": "Mark In Progress",
+        "title": "标记为进行中",
         "icon": "$(sync)"
       },
       {
         "command": "claudeTaskMaster.markTodo",
-        "title": "Mark Todo",
+        "title": "标记为待办",
         "icon": "$(circle-outline)"
       },
       {
         "command": "claudeTaskMaster.markBlocked",
-        "title": "Mark Blocked",
+        "title": "标记为已阻塞",
         "icon": "$(x)"
       },
       {
         "command": "claudeTaskMaster.expandAll",
-        "title": "Expand All",
+        "title": "全部展开",
         "icon": "$(expand-all)"
       },
       {
         "command": "claudeTaskMaster.switchTag",
-        "title": "Task Master: Switch Tag",
+        "title": "任务管理：切换标签",
         "icon": "$(tag)"
       },
       {
         "command": "claudeTaskMaster.createTag",
-        "title": "Task Master: Create Tag",
+        "title": "任务管理：创建标签",
         "icon": "$(plus)"
       },
       {
         "command": "claudeTaskMaster.deleteTag",
-        "title": "Task Master: Delete Tag",
+        "title": "任务管理：删除标签",
         "icon": "$(trash)"
       },
       {
         "command": "claudeTaskMaster.listTags",
-        "title": "Task Master: List Tags",
+        "title": "任务管理：列出标签",
         "icon": "$(list-unordered)"
       }
     ],
@@ -369,47 +369,47 @@
       ]
     },
     "configuration": {
-      "title": "Claude Task Master",
+      "title": "任务管家",
       "properties": {
         "claudeTaskMaster.autoRefresh": {
           "type": "boolean",
           "default": true,
-          "description": "Automatically refresh tasks when files change"
+          "description": "文件更改时自动刷新任务"
         },
         "claudeTaskMaster.taskmasterPath": {
           "type": "string",
           "default": ".taskmaster",
-          "description": "Path to the taskmaster directory (relative to workspace root)"
+          "description": "taskmaster 目录路径（相对于工作区根目录）"
         },
         "claudeTaskMaster.developmentMode": {
           "type": "boolean",
           "default": false,
-          "description": "Enable development mode with detailed logging"
+          "description": "启用详细日志的开发模式"
         },
         "claudeTaskMaster.enableLogging": {
           "type": "boolean",
           "default": true,
-          "description": "Enable console and output channel logging for debugging"
+          "description": "启用控制台和输出通道日志用于调试"
         },
         "claudeTaskMaster.enableFileLogging": {
           "type": "boolean",
           "default": false,
-          "description": "Enable file logging to logs/extension.log (creates files in your project)"
+          "description": "启用文件日志记录到 logs/extension.log（会在项目中创建文件）"
         },
         "claudeTaskMaster.disableMCP": {
           "type": "boolean",
           "default": false,
-          "description": "Disable MCP integration (use file-based operations only)"
+          "description": "禁用 MCP 集成（仅使用基于文件的操作）"
         },
         "claudeTaskMaster.preferCLIOnVersionMismatch": {
           "type": "boolean",
           "default": true,
-          "description": "Prefer CLI over MCP when version mismatches are detected between task-master installations"
+          "description": "检测到 task-master 版本不匹配时优先使用 CLI 而非 MCP"
         },
         "claudeTaskMaster.versionCheckInterval": {
           "type": "number",
           "default": 300000,
-          "description": "How often to check for version compatibility (in milliseconds, default 5 minutes)"
+          "description": "版本兼容性检查频率（毫秒，默认 5 分钟）"
         }
       }
     }

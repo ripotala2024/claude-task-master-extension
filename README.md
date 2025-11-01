@@ -1,6 +1,6 @@
 # Claude Task Master Visual Interface
 
-[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](https://marketplace.visualstudio.com/items?itemName=DevDreed.claude-task-master-extension)
+[![Version](https://img.shields.io/badge/version-1.3.2-blue.svg)](https://marketplace.visualstudio.com/items?itemName=DevDreed.claude-task-master-extension)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![VS Code](https://img.shields.io/badge/VS%20Code-1.70.0+-orange.svg)](https://code.visualstudio.com/)
 [![Tests](https://img.shields.io/badge/tests-130%20passing-brightgreen.svg)](TEST_COVERAGE.md)

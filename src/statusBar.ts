@@ -59,9 +59,9 @@ export class TagStatusBarItem {
                 // Detailed tooltip with available tags
                 if (tagCount > 1) {
                     const availableTagsList = tagContext.availableTags?.join(', ') || '';
-                    this.statusBarItem.tooltip = `Current Tag: ${currentTag}\nAvailable Tags (${tagCount}): ${availableTagsList}\nClick to switch tags`;
+                    this.statusBarItem.tooltip = `当前标签：${currentTag}\n可用标签 (${tagCount})：${availableTagsList}\n点击切换标签`;
                 } else {
-                    this.statusBarItem.tooltip = `Current Tag: ${currentTag}\nClick to manage tags`;
+                    this.statusBarItem.tooltip = `当前标签：${currentTag}\n点击管理标签`;
                 }
                 
                 // Show the status bar item
@@ -77,8 +77,8 @@ export class TagStatusBarItem {
             log(`Error updating status bar: ${error}`);
             
             // Show error state
-            this.statusBarItem.text = `$(tag) Error`;
-            this.statusBarItem.tooltip = `Error loading tag information: ${error instanceof Error ? error.message : String(error)}`;
+            this.statusBarItem.text = `$(tag) 错误`;
+            this.statusBarItem.tooltip = `加载标签信息失败：${error instanceof Error ? error.message : String(error)}`;
             this.statusBarItem.show();
         }
     }

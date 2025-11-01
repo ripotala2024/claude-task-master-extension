@@ -74,30 +74,30 @@ export class TaskItem extends vscode.TreeItem {
     }
 
     private generateTooltip(task: Task): string {
-        let tooltip = `${task.title}\n\nStatus: ${task.status}`;
+        let tooltip = `${task.title}\n\n状态：${task.status}`;
         
         // Add tag information if available
         if (this.tagContext?.isTaggedFormat) {
-            tooltip += `\nTag: ${this.tagContext.currentTag}`;
+            tooltip += `\n标签：${this.tagContext.currentTag}`;
             if (this.tagContext.availableTags.length > 1) {
-                tooltip += ` (${this.tagContext.availableTags.length} tags available)`;
+                tooltip += ` (${this.tagContext.availableTags.length} 个可用标签)`;
             }
         }
         
         if (task.priority) {
-            tooltip += `\nPriority: ${task.priority}`;
+            tooltip += `\n优先级：${task.priority}`;
         }
         
         if (task.description) {
-            tooltip += `\nDescription: ${task.description}`;
+            tooltip += `\n描述：${task.description}`;
         }
         
         if (task.dependencies && task.dependencies.length > 0) {
-            tooltip += `\nDependencies: ${task.dependencies.join(', ')}`;
+            tooltip += `\n依赖：${task.dependencies.join(', ')}`;
         }
         
         if (task.dueDate) {
-            tooltip += `\nDue: ${task.dueDate}`;
+            tooltip += `\n截止：${task.dueDate}`;
         }
         
         // Add subtask information to tooltip
@@ -659,10 +659,10 @@ export class TaskProvider implements vscode.TreeDataProvider<TaskItem> {
             
             if (currentTasks.length > 0 || currentSubtasks.length > 0) {
                 // Add Current Task Section Header
-                const currentHeaderKey = this.getItemKey('category', 'CURRENT WORK');
+                const currentHeaderKey = this.getItemKey('category', '当前工作');
                 const currentIsExpanded = this.isExpanded(currentHeaderKey);
                 const currentHeaderItem = new TaskItem(
-                    '📝 CURRENT WORK',
+                    '📝 当前工作',
                     currentIsExpanded ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed,
                     undefined,
                     'category'
@@ -688,16 +688,16 @@ export class TaskProvider implements vscode.TreeDataProvider<TaskItem> {
                 log(`getRootItems: Next task found: ${nextTask.id}`);
                 
                 // Add Next Task Section Header
-                const nextHeaderKey = this.getItemKey('category', 'NEXT TO WORK ON');
+                const nextHeaderKey = this.getItemKey('category', '下一步工作');
                 const nextIsExpanded = this.isExpanded(nextHeaderKey);
                 const nextHeaderItem = new TaskItem(
-                    '🎯 NEXT TO WORK ON',
+                    '🎯 下一步工作',
                     nextIsExpanded ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed,
                     undefined,
                     'category'
                 );
                 nextHeaderItem.iconPath = new vscode.ThemeIcon('target', new vscode.ThemeColor('charts.orange'));
-                nextHeaderItem.description = 'Recommended next task based on dependencies';
+                nextHeaderItem.description = '基于依赖关系推荐的下一个任务';
                 items.push(nextHeaderItem);
             } else {
                 log('getRootItems: No next task found.');
@@ -710,15 +710,15 @@ export class TaskProvider implements vscode.TreeDataProvider<TaskItem> {
             const completedPercentage = progress.mainTasks.total > 0 ? Math.round((progress.mainTasks.completed / progress.mainTasks.total) * 100) : 0;
             const progressBar = this.generateProgressBar(completedPercentage);
             
-            const itemKey = this.getItemKey('progress', 'Progress Overview');
+            const itemKey = this.getItemKey('progress', '进度概览');
             const isExpanded = this.isExpanded(itemKey);
             const progressItem = new TaskItem(
-                `📊 Progress Overview ${progressBar}`,
+                `📊 进度概览 ${progressBar}`,
                 isExpanded ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed,
                 undefined,
                 'progress'
             );
-            progressItem.description = `${completedPercentage}% (${progress.mainTasks.completed}/${progress.mainTasks.total} tasks)`;
+            progressItem.description = `${completedPercentage}% (${progress.mainTasks.completed}/${progress.mainTasks.total} 个任务)`;
             items.push(progressItem);
 
             // Group by status
@@ -726,13 +726,26 @@ export class TaskProvider implements vscode.TreeDataProvider<TaskItem> {
             const statusGroups = this.groupTasksByStatus(tasks);
             log(`getRootItems: Status groups: ${Object.keys(statusGroups).map(k => `${k}: ${statusGroups[k]?.length || 0}`).join(', ')}`);
             
+            const statusLabels: Record<string, string> = {
+                'todo': '待办',
+                'pending': '待办',
+                'in-progress': '进行中',
+                'completed': '已完成',
+                'done': '已完成',
+                'blocked': '已阻塞',
+                'deferred': '已延期',
+                'cancelled': '已取消',
+                'review': '审核中'
+            };
+            
             for (const [status, statusTasks] of Object.entries(statusGroups)) {
                 if (statusTasks && statusTasks.length > 0) {
                     const statusEmoji = this.getStatusEmojiForProvider(status);
+                    const statusLabel = statusLabels[status] || this.capitalizeFirst(status.replace('-', ' '));
                     const itemKey = this.getItemKey('category', status);
                     const isExpanded = this.isExpanded(itemKey);
                     const statusItem = new TaskItem(
-                        `${statusEmoji} ${this.capitalizeFirst(status.replace('-', ' '))} (${statusTasks.length})`,
+                        `${statusEmoji} ${statusLabel} (${statusTasks.length})`,
                         isExpanded ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed,
                         undefined,
                         'category'
@@ -746,10 +759,10 @@ export class TaskProvider implements vscode.TreeDataProvider<TaskItem> {
             const priorityTasks = tasks.filter(task => task.priority);
             if (priorityTasks.length > 0) {
                 log(`getRootItems: Adding priority grouping for ${priorityTasks.length} tasks.`);
-                const itemKey = this.getItemKey('category', 'By Priority');
+                const itemKey = this.getItemKey('category', '按优先级');
                 const isExpanded = this.isExpanded(itemKey);
                 const priorityItem = new TaskItem(
-                    'By Priority',
+                    '⭐ 按优先级',
                     isExpanded ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed,
                     undefined,
                     'category'
@@ -762,10 +775,10 @@ export class TaskProvider implements vscode.TreeDataProvider<TaskItem> {
             const categorizedTasks = tasks.filter(task => task.category);
             if (categorizedTasks.length > 0) {
                 log(`getRootItems: Adding category grouping for ${categorizedTasks.length} tasks.`);
-                const itemKey = this.getItemKey('category', 'By Category');
+                const itemKey = this.getItemKey('category', '按分类');
                 const isExpanded = this.isExpanded(itemKey);
                 const categoryItem = new TaskItem(
-                    'By Category',
+                    '🏷️ 按分类',
                     isExpanded ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed,
                     undefined,
                     'category'
@@ -829,7 +842,7 @@ export class TaskProvider implements vscode.TreeDataProvider<TaskItem> {
                     0 // Main tasks always at root level
                 );
                 currentItem.iconPath = new vscode.ThemeIcon('play', new vscode.ThemeColor('charts.blue'));
-                currentItem.description = `[IN-PROGRESS] Priority: ${task.priority?.toUpperCase() || 'MEDIUM'}`;
+                currentItem.description = `[进行中] 优先级：${task.priority?.toUpperCase() || 'MEDIUM'}`;
                 
                 return currentItem;
             });
@@ -868,21 +881,21 @@ export class TaskProvider implements vscode.TreeDataProvider<TaskItem> {
                     const parentTask = tasks.find(task => 
                         task.subtasks?.some(st => st.id === nextTask.id)
                     );
-                    nextTaskItem.description = `[READY] Part of Task ${parentTask?.id}`;
+                    nextTaskItem.description = `[准备就绪] 任务 ${parentTask?.id} 的一部分`;
                 } else {
-                    nextTaskItem.description = `[READY] Priority: ${nextTask.priority?.toUpperCase() || 'MEDIUM'}`;
+                    nextTaskItem.description = `[准备就绪] 优先级：${nextTask.priority?.toUpperCase() || 'MEDIUM'}`;
                 }
                 nextTaskItem.contextValue = 'next-task';
                 
                 return [nextTaskItem];
             }
             return [];
-        } else if (normalizedLabel.includes('progress overview')) {
+        } else if (normalizedLabel.includes('progress overview') || normalizedLabel.includes('进度概览')) {
             // Return progress items for the Progress Overview section
             return this.getProgressItems();
         }
 
-        if (normalizedLabel.includes('todo')) {
+        if (normalizedLabel.includes('todo') || normalizedLabel.includes('待办')) {
             // Show main tasks that are todo/pending, or have todo/pending subtasks
             const todoTasks = tasks.filter(task => task.status === 'todo' || task.status === 'pending');
             const tasksWithTodoSubtasks = tasks.filter(task => 
@@ -891,7 +904,7 @@ export class TaskProvider implements vscode.TreeDataProvider<TaskItem> {
             );
             filteredTasks = [...todoTasks, ...tasksWithTodoSubtasks];
             log(`Filtered for 'Todo': ${filteredTasks.length} tasks (${todoTasks.length} main + ${tasksWithTodoSubtasks.length} tasks with todo subtasks).`);
-        } else if (normalizedLabel.includes('in progress')) {
+        } else if (normalizedLabel.includes('in progress') || normalizedLabel.includes('进行中')) {
             log(`Filtering for In progress. Total tasks: ${tasks.length}`);
             
             // Show main tasks that are in-progress, or have in-progress subtasks
@@ -904,7 +917,7 @@ export class TaskProvider implements vscode.TreeDataProvider<TaskItem> {
             filteredTasks = [...inProgressTasks, ...tasksWithInProgressSubtasks];
             log(`Filtered for category '${categoryLabel}': ${filteredTasks.length} tasks (${inProgressTasks.length} main tasks + ${tasksWithInProgressSubtasks.length} tasks with in-progress subtasks).`);
             filteredTasks.forEach(task => log(`In progress item: ${task.id} - ${task.title}`));
-        } else if (normalizedLabel.includes('completed')) {
+        } else if (normalizedLabel.includes('completed') || normalizedLabel.includes('已完成')) {
             // Show completed main tasks with proper hierarchy, not a flat list
             const completedTasks = tasks.filter(task => task.status === 'completed' || task.status === 'done');
             
@@ -943,7 +956,7 @@ export class TaskProvider implements vscode.TreeDataProvider<TaskItem> {
                 
                 return taskItem;
             });
-        } else if (normalizedLabel.includes('blocked')) {
+        } else if (normalizedLabel.includes('blocked') || normalizedLabel.includes('已阻塞')) {
             // Show main tasks that are blocked, or have blocked subtasks
             const blockedTasks = tasks.filter(task => task.status === 'blocked');
             const tasksWithBlockedSubtasks = tasks.filter(task => 
@@ -952,7 +965,7 @@ export class TaskProvider implements vscode.TreeDataProvider<TaskItem> {
             );
             filteredTasks = [...blockedTasks, ...tasksWithBlockedSubtasks];
             log(`Filtered for 'Blocked': ${filteredTasks.length} tasks (${blockedTasks.length} main + ${tasksWithBlockedSubtasks.length} tasks with blocked subtasks).`);
-        } else if (normalizedLabel.includes('deferred')) {
+        } else if (normalizedLabel.includes('deferred') || normalizedLabel.includes('已延期')) {
             // Show main tasks that are deferred, or have deferred subtasks
             const deferredTasks = tasks.filter(task => task.status === 'deferred');
             const tasksWithDeferredSubtasks = tasks.filter(task => 
@@ -961,7 +974,7 @@ export class TaskProvider implements vscode.TreeDataProvider<TaskItem> {
             );
             filteredTasks = [...deferredTasks, ...tasksWithDeferredSubtasks];
             log(`Filtered for 'Deferred': ${filteredTasks.length} tasks (${deferredTasks.length} main + ${tasksWithDeferredSubtasks.length} tasks with deferred subtasks).`);
-        } else if (normalizedLabel.includes('cancelled')) {
+        } else if (normalizedLabel.includes('cancelled') || normalizedLabel.includes('已取消')) {
             // Show main tasks that are cancelled, or have cancelled subtasks
             const cancelledTasks = tasks.filter(task => task.status === 'cancelled');
             const tasksWithCancelledSubtasks = tasks.filter(task => 
@@ -970,7 +983,7 @@ export class TaskProvider implements vscode.TreeDataProvider<TaskItem> {
             );
             filteredTasks = [...cancelledTasks, ...tasksWithCancelledSubtasks];
             log(`Filtered for 'Cancelled': ${filteredTasks.length} tasks (${cancelledTasks.length} main + ${tasksWithCancelledSubtasks.length} tasks with cancelled subtasks).`);
-        } else if (normalizedLabel.includes('review')) {
+        } else if (normalizedLabel.includes('review') || normalizedLabel.includes('审核中')) {
             // Show main tasks that are in review, or have subtasks in review
             const reviewTasks = tasks.filter(task => task.status === 'review');
             const tasksWithReviewSubtasks = tasks.filter(task => 
@@ -979,27 +992,34 @@ export class TaskProvider implements vscode.TreeDataProvider<TaskItem> {
             );
             filteredTasks = [...reviewTasks, ...tasksWithReviewSubtasks];
             log(`Filtered for 'Review': ${filteredTasks.length} tasks (${reviewTasks.length} main + ${tasksWithReviewSubtasks.length} tasks with review subtasks).`);
-        } else if (normalizedLabel.includes('by priority')) {
+        } else if (normalizedLabel.includes('按优先级') || normalizedLabel.includes('by priority')) {
             log('Filtering by priority groups.');
             return this.getTasksByPriorityGroups(tasks);
-        } else if (normalizedLabel === 'by category') {
+        } else if (normalizedLabel === 'by category' || normalizedLabel === '按分类') {
             log('Filtering by category groups.');
             return this.getTasksByCategoryGroups(tasks);
-        } else if (normalizedLabel.includes('priority')) {
-            // Handle specific priority groups like "🔴 High Priority (3)"
+        } else if (normalizedLabel.includes('priority') || normalizedLabel.includes('优先级')) {
+            // Handle specific priority groups like "🔴 高优先级 (3)" or "🔴 High Priority (3)"
             let priority = '';
-            if (normalizedLabel.includes('critical priority')) {
+            if (normalizedLabel.includes('严重优先级') || normalizedLabel.includes('critical priority')) {
                 priority = 'critical';
-            } else if (normalizedLabel.includes('high priority')) {
+            } else if (normalizedLabel.includes('高优先级') || normalizedLabel.includes('high priority')) {
                 priority = 'high';
-            } else if (normalizedLabel.includes('medium priority')) {
+            } else if (normalizedLabel.includes('中优先级') || normalizedLabel.includes('medium priority')) {
                 priority = 'medium';
-            } else if (normalizedLabel.includes('low priority')) {
+            } else if (normalizedLabel.includes('低优先级') || normalizedLabel.includes('low priority')) {
                 priority = 'low';
             }
             filteredTasks = tasks.filter(task => task.priority === priority);
             log(`Filtered for priority '${priority}': ${filteredTasks.length} tasks.`);
-        } else if (normalizedLabel.includes('(') && !normalizedLabel.includes('todo') && !normalizedLabel.includes('in progress') && !normalizedLabel.includes('completed') && !normalizedLabel.includes('blocked')) {
+        } else if (normalizedLabel.includes('(') && 
+                   !normalizedLabel.includes('todo') && !normalizedLabel.includes('待办') && 
+                   !normalizedLabel.includes('in progress') && !normalizedLabel.includes('进行中') && 
+                   !normalizedLabel.includes('completed') && !normalizedLabel.includes('已完成') && 
+                   !normalizedLabel.includes('blocked') && !normalizedLabel.includes('已阻塞') &&
+                   !normalizedLabel.includes('deferred') && !normalizedLabel.includes('已延期') &&
+                   !normalizedLabel.includes('cancelled') && !normalizedLabel.includes('已取消') &&
+                   !normalizedLabel.includes('review') && !normalizedLabel.includes('审核中')) {
             // Handle category groups like "Frontend (2)"
             const category = categoryLabel.split(' (')[0];
             filteredTasks = tasks.filter(task => task.category === category);
@@ -1050,16 +1070,23 @@ export class TaskProvider implements vscode.TreeDataProvider<TaskItem> {
 
     private async getTasksByPriorityGroups(tasks: Task[]): Promise<TaskItem[]> {
         const priorities = ['critical', 'high', 'medium', 'low'];
+        const priorityLabels: Record<string, string> = {
+            'critical': '严重',
+            'high': '高',
+            'medium': '中',
+            'low': '低'
+        };
         const items: TaskItem[] = [];
 
         for (const priority of priorities) {
             const priorityTasks = tasks.filter(task => task.priority === priority);
             if (priorityTasks.length > 0) {
                 const priorityEmoji = this.getPriorityEmojiForProvider(priority);
-                const itemKey = this.getItemKey('category', `${this.capitalizeFirst(priority)} Priority`);
+                const priorityLabel = priorityLabels[priority] || this.capitalizeFirst(priority);
+                const itemKey = this.getItemKey('category', `${priorityLabel}优先级`);
                 const isExpanded = this.isExpanded(itemKey);
                 const priorityItem = new TaskItem(
-                    `${priorityEmoji} ${this.capitalizeFirst(priority)} Priority (${priorityTasks.length})`,
+                    `${priorityEmoji} ${priorityLabel}优先级 (${priorityTasks.length})`,
                     isExpanded ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed,
                     undefined,
                     'category'
@@ -1112,18 +1139,18 @@ export class TaskProvider implements vscode.TreeDataProvider<TaskItem> {
             
             // Add main tasks summary first
             const mainTasksHeader = new TaskItem(
-                `📋 Main Tasks (${progress.mainTasks.total})`,
+                `📋 主任务 (${progress.mainTasks.total})`,
                 vscode.TreeItemCollapsibleState.None
             );
             mainTasksHeader.iconPath = new vscode.ThemeIcon('list-unordered', new vscode.ThemeColor('charts.blue'));
-            mainTasksHeader.description = 'Task IDs only';
+            mainTasksHeader.description = '仅任务编号';
             items.push(mainTasksHeader);
 
             const mainTasksData = [
-                { label: 'Completed', count: progress.mainTasks.completed, icon: 'check', color: 'charts.green' },
-                { label: 'In Progress', count: progress.mainTasks.inProgress, icon: 'loading~spin', color: 'charts.blue' },
-                { label: 'Todo', count: progress.mainTasks.todo, icon: 'circle-outline', color: 'charts.yellow' },
-                { label: 'Blocked', count: progress.mainTasks.blocked, icon: 'error', color: 'charts.red' }
+                { label: '已完成', count: progress.mainTasks.completed, icon: 'check', color: 'charts.green' },
+                { label: '进行中', count: progress.mainTasks.inProgress, icon: 'loading~spin', color: 'charts.blue' },
+                { label: '待办', count: progress.mainTasks.todo, icon: 'circle-outline', color: 'charts.yellow' },
+                { label: '已阻塞', count: progress.mainTasks.blocked, icon: 'error', color: 'charts.red' }
             ];
 
             for (const item of mainTasksData) {
@@ -1155,18 +1182,18 @@ export class TaskProvider implements vscode.TreeDataProvider<TaskItem> {
 
             // Add all items summary
             const allItemsHeader = new TaskItem(
-                `📊 All Items (${progress.allItems.total})`,
+                `📊 全部项目 (${progress.allItems.total})`,
                 vscode.TreeItemCollapsibleState.None
             );
             allItemsHeader.iconPath = new vscode.ThemeIcon('graph', new vscode.ThemeColor('charts.purple'));
-            allItemsHeader.description = 'Including subtasks';
+            allItemsHeader.description = '包含子任务';
             items.push(allItemsHeader);
 
             const allItemsData = [
-                { label: 'Completed', count: progress.allItems.completed, icon: 'check', color: 'charts.green' },
-                { label: 'In Progress', count: progress.allItems.inProgress, icon: 'loading~spin', color: 'charts.blue' },
-                { label: 'Todo', count: progress.allItems.todo, icon: 'circle-outline', color: 'charts.yellow' },
-                { label: 'Blocked', count: progress.allItems.blocked, icon: 'error', color: 'charts.red' }
+                { label: '已完成', count: progress.allItems.completed, icon: 'check', color: 'charts.green' },
+                { label: '进行中', count: progress.allItems.inProgress, icon: 'loading~spin', color: 'charts.blue' },
+                { label: '待办', count: progress.allItems.todo, icon: 'circle-outline', color: 'charts.yellow' },
+                { label: '已阻塞', count: progress.allItems.blocked, icon: 'error', color: 'charts.red' }
             ];
 
             for (const item of allItemsData) {

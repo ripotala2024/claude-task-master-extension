@@ -58,21 +58,21 @@ export function validateTagContext(tagContext: TagContextInfo, requiredTag?: str
     if (!tagContext.currentTag) {
         return {
             isValid: false,
-            error: 'No current tag specified'
+            error: '未指定当前标签'
         };
     }
     
     if (!tagContext.availableTags.includes(tagContext.currentTag)) {
         return {
             isValid: false,
-            error: `Current tag '${tagContext.currentTag}' is not in available tags list`
+            error: `当前标签 '${tagContext.currentTag}' 不在可用标签列表中`
         };
     }
     
     if (requiredTag && tagContext.currentTag !== requiredTag) {
         return {
             isValid: false,
-            error: `Operation requires tag '${requiredTag}' but current tag is '${tagContext.currentTag}'`
+            error: `操作需要标签 '${requiredTag}'，但当前标签是 '${tagContext.currentTag}'`
         };
     }
     
@@ -93,7 +93,7 @@ export function createTagSelectionOptions(
     
     return tagContext.availableTags.map(tag => ({
         label: tag,
-        detail: tag === tagContext.currentTag ? 'Current tag' : 'Available tag',
+        detail: tag === tagContext.currentTag ? '当前标签' : '可用标签',
         picked: showCurrentTag && tag === tagContext.currentTag,
         tagName: tag
     }));
@@ -110,7 +110,7 @@ export async function showTagSelectionPicker(
     options: TagUIOptions = {}
 ): Promise<string | undefined> {
     const { 
-        placeholder = `Select tag context (current: ${tagContext.currentTag})`,
+        placeholder = `选择标签上下文（当前：${tagContext.currentTag}）`,
         allowMultipleSelection = false 
     } = options;
     
@@ -201,7 +201,7 @@ export function handleTagContextError(
     log(`Tag context error in ${operation}: ${errorMessage}. Using fallback tag: ${fallbackTag}`);
     
     vscode.window.showWarningMessage(
-        `Tag context error: ${errorMessage}. Using fallback tag: ${fallbackTag}`
+        `标签上下文错误：${errorMessage}。使用备用标签：${fallbackTag}`
     );
     
     return {
@@ -232,5 +232,5 @@ export function formatTagSuccessMessage(baseMessage: string, tagContext: TagCont
         return baseMessage;
     }
     
-    return `${baseMessage} (Tag: ${tagContext.currentTag})`;
+    return `${baseMessage}（标签：${tagContext.currentTag}）`;
 } 

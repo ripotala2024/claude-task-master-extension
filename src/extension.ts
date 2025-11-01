@@ -74,15 +74,15 @@ export function activate(context: vscode.ExtensionContext) {
         log('❌ No .taskmaster directory found in workspace at: ' + taskmasterPath);
         // Show a message directing users to task-master-ai
         vscode.window.showInformationMessage(
-            'This extension requires a task-master-ai project. Initialize task-master-ai to get started.',
-            'Learn About Task Master AI',
-            'Open Terminal'
+            '此扩展需要 task-master-ai 项目。初始化 task-master-ai 开始使用。',
+            '了解 Task Master AI',
+            '打开终端'
         ).then(selection => {
-            if (selection === 'Learn About Task Master AI') {
+            if (selection === '了解 Task Master AI') {
                 vscode.env.openExternal(vscode.Uri.parse('https://github.com/eyaltoledano/claude-task-master'));
-            } else if (selection === 'Open Terminal') {
+            } else if (selection === '打开终端') {
                 vscode.commands.executeCommand('workbench.action.terminal.new');
-                vscode.window.showInformationMessage('Run "npm install -g task-master-ai" then "task-master init" or use Claude AI chat with task-master-ai MCP to initialize.');
+                vscode.window.showInformationMessage('运行 "npm install -g task-master-ai" 然后 "task-master init" 或使用 Claude AI 聊天与 task-master-ai MCP 进行初始化。');
             }
         });
         return;
@@ -508,7 +508,7 @@ async function showTaskDetails(task: Task, context: vscode.ExtensionContext, par
                             await taskMasterClient.setSubtaskStatus(actualParentTaskId, message.subtaskId, message.status);
                             taskProvider.refresh();
                             vscode.window.showInformationMessage(
-                                `Subtask ${message.subtaskId} in Task ${actualParentTaskId} marked as ${message.status}`
+                                `任务 ${actualParentTaskId} 中的子任务 ${message.subtaskId} 已标记为 ${message.status}`
                             );
                             // Refresh the webview with updated data
                             log(`Refreshing webview for task ${task.id} after subtask update.`);
@@ -519,7 +519,7 @@ async function showTaskDetails(task: Task, context: vscode.ExtensionContext, par
                         } catch (error) {
                             const errorMessage = error instanceof Error ? error.message : String(error);
                             log(`Error updating subtask: ${errorMessage}`);
-                            vscode.window.showErrorMessage(`Failed to update subtask: ${errorMessage}`);
+                            vscode.window.showErrorMessage(`更新子任务失败：${errorMessage}`);
                         }
                         break;
 
@@ -543,14 +543,14 @@ async function showTaskDetails(task: Task, context: vscode.ExtensionContext, par
                         // Only allow adding subtasks to main tasks, not to subtasks
                         if (isSubtask) {
                             vscode.window.showWarningMessage(
-                                `Cannot add subtasks to subtask ${task.id}. Please add subtasks to the parent task instead.`
+                                `无法向子任务 ${task.id} 添加子任务。请向父任务添加子任务。`
                             );
                         } else {
                                 // Try to add subtask with CLI fallback
     try {
         await addNewSubtaskWithFallback(task);
     } catch (error) {
-        vscode.window.showErrorMessage(`Failed to add subtask: ${error}`);
+        vscode.window.showErrorMessage(`添加子任务失败：${error}`);
     }
                         }
                         break;
@@ -568,11 +568,11 @@ async function showTaskDetails(task: Task, context: vscode.ExtensionContext, par
                             const parentId = idParts[0];
                             const subtaskNumber = idParts.slice(1).join('.');
                             vscode.window.showInformationMessage(
-                                `🎯 Started working on Task ${parentId} → Subtask ${subtaskNumber}: ${task.title}`
+                                `🎯 开始处理任务 ${parentId} → 子任务 ${subtaskNumber}: ${task.title}`
                             );
                         } else {
                             vscode.window.showInformationMessage(
-                                `🎯 Started working on Task ${task.id}: ${task.title}`
+                                `🎯 开始处理任务 ${task.id}: ${task.title}`
                             );
                         }
                         break;
@@ -583,7 +583,7 @@ async function showTaskDetails(task: Task, context: vscode.ExtensionContext, par
         );
     } catch (error) {
         log(`Error in showTaskDetails: ${error}`);
-        vscode.window.showErrorMessage(`Failed to load task details: ${error}`);
+        vscode.window.showErrorMessage(`加载任务详情失败：${error}`);
     }
 }
 
@@ -592,11 +592,11 @@ async function expandTask(task: Task) {
         try {
             await expandTaskWithFallback(task);
         } catch (error) {
-            vscode.window.showErrorMessage(`Failed to expand task: ${error}`);
+            vscode.window.showErrorMessage(`展开任务失败：${error}`);
         }
         // For now, we'll show an info message
     } catch (error) {
-        vscode.window.showErrorMessage(`Failed to expand task: ${error}`);
+        vscode.window.showErrorMessage(`展开任务失败：${error}`);
     }
 }
 
@@ -612,11 +612,11 @@ async function showNextTask(context: vscode.ExtensionContext) {
             log(`showNextTask: nextTask.id="${nextTask.id}", extracted parentTaskId="${parentTaskId || 'none'}"`);
             await showTaskDetails(nextTask, context, parentTaskId);
         } else {
-            const message = formatTagSuccessMessage('No next task available', tagContext);
+            const message = formatTagSuccessMessage('没有可用的下一个任务', tagContext);
             vscode.window.showInformationMessage(message);
         }
     } catch (error) {
-        vscode.window.showErrorMessage(`Failed to get next task: ${error}`);
+        vscode.window.showErrorMessage(`获取下一个任务失败：${error}`);
     }
 }
 
@@ -642,7 +642,7 @@ async function openPRD() {
         }
     }
 
-    vscode.window.showWarningMessage('No PRD file found. Create one at .taskmaster/docs/prd.txt');
+    vscode.window.showWarningMessage('未找到需求文档文件。请在 .taskmaster/docs/prd.txt 创建一个');
 }
 
 async function startWorkingOnTask(task: Task, context: vscode.ExtensionContext, parentTaskId?: string) {
@@ -655,16 +655,16 @@ async function startWorkingOnTask(task: Task, context: vscode.ExtensionContext, 
         
         // Set task status to in-progress with tag-aware confirmation
         const confirmMessage = tagContext.isTaggedFormat
-            ? `[Tag: ${tagContext.currentTag}] Start working on "${task.title}"? This will set the task status to "in-progress".`
-            : `Start working on "${task.title}"? This will set the task status to "in-progress".`;
+            ? `[标签: ${tagContext.currentTag}] 开始处理"${task.title}"？这将把任务状态设置为"进行中"。`
+            : `开始处理"${task.title}"？这将把任务状态设置为"进行中"。`;
             
         const confirmed = await vscode.window.showInformationMessage(
             confirmMessage,
-            'Start Working',
-            'Cancel'
+            '开始工作',
+            '取消'
         );
         
-        if (confirmed === 'Start Working') {
+        if (confirmed === '开始工作') {
             await setTaskStatusWithContext(task, 'in-progress', parentTaskId);
             
             const successMessage = formatTagSuccessMessage(
@@ -688,10 +688,10 @@ function generateTaskDetailsHtml(task: Task, parentTaskId?: string): string {
     // Parse parent and subtask information for better display
     let taskDisplayInfo = {
         taskId: task.id,
-        taskType: isSubtask ? 'Subtask' : 'Main Task',
-        parentInfo: isSubtask ? `Part of Task ${parentTaskId}` : '',
-        fullHierarchy: isSubtask ? `Task ${parentTaskId} → Subtask ${task.id}` : `Task ${task.id}`,
-        tagInfo: tagContext.isTaggedFormat ? `Tag: ${tagContext.currentTag}` : ''
+        taskType: isSubtask ? '子任务' : '主任务',
+        parentInfo: isSubtask ? `任务 ${parentTaskId} 的一部分` : '',
+        fullHierarchy: isSubtask ? `任务 ${parentTaskId} → 子任务 ${task.id}` : `任务 ${task.id}`,
+        tagInfo: tagContext.isTaggedFormat ? `标签：${tagContext.currentTag}` : ''
         };
     
     // Calculate subtask progress (only for main tasks)
@@ -721,11 +721,11 @@ function generateTaskDetailsHtml(task: Task, parentTaskId?: string): string {
     // Helper function to get priority color and icon
     const getPriorityInfo = (priority: string) => {
         switch (priority?.toLowerCase()) {
-            case 'critical': return { color: 'var(--vscode-errorForeground)', icon: '🔥', text: 'Critical' };
-            case 'high': return { color: 'var(--vscode-testing-iconFailed)', icon: '⬆️', text: 'High' };
-            case 'medium': return { color: 'var(--vscode-testing-iconQueued)', icon: '➡️', text: 'Medium' };
-            case 'low': return { color: 'var(--vscode-testing-iconPassed)', icon: '⬇️', text: 'Low' };
-            default: return { color: 'var(--vscode-foreground)', icon: '➡️', text: 'N/A' };
+            case 'critical': return { color: 'var(--vscode-errorForeground)', icon: '🔥', text: '严重' };
+            case 'high': return { color: 'var(--vscode-testing-iconFailed)', icon: '⬆️', text: '高' };
+            case 'medium': return { color: 'var(--vscode-testing-iconQueued)', icon: '➡️', text: '中' };
+            case 'low': return { color: 'var(--vscode-testing-iconPassed)', icon: '⬇️', text: '低' };
+            default: return { color: 'var(--vscode-foreground)', icon: '➡️', text: '无' };
         }
     };
 
@@ -1526,26 +1526,26 @@ function generateTaskDetailsHtml(task: Task, parentTaskId?: string): string {
                 </span>
                 `}
                 ${task.subtasks && task.subtasks.length > 0 ? 
-                    `<span class="priority-badge">📝 ${subtaskStats.completed}/${subtaskStats.total} subtasks completed</span>` : 
+                    `<span class="priority-badge">📝 ${subtaskStats.completed}/${subtaskStats.total} 个子任务已完成</span>` : 
                     ''
                 }
-                ${isSubtask ? `<span class="priority-badge">🧩 Subtask</span>` : ''}
+                ${isSubtask ? `<span class="priority-badge">🧩 子任务</span>` : ''}
             </div>
         </div>
 
         <div class="content-section">
-            <h2 class="section-title">📋 Description</h2>
-            <div class="task-description">${task.description || 'No description provided.'}</div>
+            <h2 class="section-title">📋 描述</h2>
+            <div class="task-description">${task.description || '未提供描述。'}</div>
         </div>
 
         ${!isSubtask && task.dependencies && task.dependencies.length > 0 ? `
         <div class="content-section">
-            <h2 class="section-title">🔗 Dependencies</h2>
+            <h2 class="section-title">🔗 依赖</h2>
             <div class="dependencies-list">
                 ${task.dependencies.map((depId: string) => `
                     <div class="dependency-item">
-                        <span class="dependency-id">Task ${depId}</span>
-                        <span class="dependency-status">✅ Completed</span>
+                        <span class="dependency-id">任务 ${depId}</span>
+                        <span class="dependency-status">✅ 已完成</span>
                     </div>
                 `).join('')}
             </div>
@@ -1554,21 +1554,21 @@ function generateTaskDetailsHtml(task: Task, parentTaskId?: string): string {
 
         ${task.details ? `
         <div class="content-section">
-            <h2 class="section-title">🔧 Implementation Details</h2>
+            <h2 class="section-title">🔧 实现详情</h2>
             <div class="implementation-details">${task.details}</div>
         </div>
         ` : ''}
 
         ${task.subtasks && task.subtasks.length > 0 ? `
         <div class="content-section">
-            <h2 class="section-title">📝 Subtasks</h2>
+            <h2 class="section-title">📝 子任务</h2>
             <div class="progress-container">
                 <div class="progress-bar">
                     <div class="progress-fill"></div>
                 </div>
                 <div class="progress-stats">
-                    <span>${progressPercentage}% Complete</span>
-                    <span>${subtaskStats.completed} of ${subtaskStats.total} done</span>
+                    <span>${progressPercentage}% 已完成</span>
+                    <span>${subtaskStats.completed} / ${subtaskStats.total} 已完成</span>
                 </div>
             </div>
             <ul class="subtask-list">
@@ -1579,7 +1579,7 @@ function generateTaskDetailsHtml(task: Task, parentTaskId?: string): string {
                                onchange="updateSubtaskStatus('${subtask.id}', this.checked ? 'completed' : 'pending')">
                         <div class="subtask-content">
                             <div>
-                                <span class="subtask-id">ID: ${subtask.id}</span>
+                                <span class="subtask-id">编号：${subtask.id}</span>
                                 <span class="subtask-title">${subtask.title}</span>
                             </div>
                             <span class="subtask-status ${subtask.status}">${subtask.status}</span>
@@ -1592,48 +1592,48 @@ function generateTaskDetailsHtml(task: Task, parentTaskId?: string): string {
 
         ${!isSubtask && task.testStrategy ? `
         <div class="content-section">
-            <h2 class="section-title">🧪 Test Strategy</h2>
+            <h2 class="section-title">🧪 测试策略</h2>
             <div class="test-strategy">${task.testStrategy}</div>
         </div>
         ` : ''}
 
         <div class="content-section">
-            <h2 class="section-title">📊 Metadata</h2>
+            <h2 class="section-title">📊 元数据</h2>
             <div class="metadata-grid">
                 <div class="metadata-item">
-                    <div class="metadata-label">Status</div>
+                    <div class="metadata-label">状态</div>
                     <div class="metadata-value status-${task.status}">
                         ${getStatusIcon(task.status)} ${task.status.replace('-', ' ')}
                     </div>
                 </div>
                 ${!isSubtask ? `
                 <div class="metadata-item">
-                    <div class="metadata-label">Priority</div>
+                    <div class="metadata-label">优先级</div>
                     <div class="metadata-value" style="color: ${priorityInfo.color}">
                         ${priorityInfo.icon} ${priorityInfo.text}
                     </div>
                 </div>
                 ` : `
                 <div class="metadata-item">
-                    <div class="metadata-label">Type</div>
-                    <div class="metadata-value">🧩 Subtask</div>
+                    <div class="metadata-label">类型</div>
+                    <div class="metadata-value">🧩 子任务</div>
                 </div>
                 `}
                 ${!isSubtask && task.subtasks && task.subtasks.length > 0 ? `
                 <div class="metadata-item">
-                    <div class="metadata-label">Progress</div>
+                    <div class="metadata-label">进度</div>
                     <div class="metadata-value">${progressPercentage}% (${subtaskStats.completed}/${subtaskStats.total})</div>
                 </div>
                 ` : ''}
                 ${task.created ? `
                 <div class="metadata-item">
-                    <div class="metadata-label">Created</div>
+                    <div class="metadata-label">创建时间</div>
                     <div class="metadata-value">${new Date(task.created).toLocaleDateString()}</div>
                 </div>
                 ` : ''}
                 ${task.updated ? `
                 <div class="metadata-item">
-                    <div class="metadata-label">Last Updated</div>
+                    <div class="metadata-label">最后更新</div>
                     <div class="metadata-value">${new Date(task.updated).toLocaleDateString()}</div>
                 </div>
                 ` : ''}
@@ -1641,12 +1641,12 @@ function generateTaskDetailsHtml(task: Task, parentTaskId?: string): string {
         </div>
 
         <div class="action-buttons">
-            <button class="action-button" onclick="updateTaskStatus()">📝 Update Status</button>
+            <button class="action-button" onclick="updateTaskStatus()">📝 更新状态</button>
             ${!isSubtask ? `
-            <button class="action-button secondary" onclick="expandTask()">🔍 Expand Task</button>
-            <button class="action-button secondary" onclick="addSubtask()">➕ Add Subtask</button>
+            <button class="action-button secondary" onclick="expandTask()">🔍 展开任务</button>
+            <button class="action-button secondary" onclick="addSubtask()">➕ 添加子任务</button>
             ` : ''}
-            <button class="action-button secondary" onclick="startWorking()">🎯 Start Working</button>
+            <button class="action-button secondary" onclick="startWorking()">🎯 开始工作</button>
         </div>
     </div>
 
@@ -1822,7 +1822,7 @@ async function expandTaskWithFallback(task: Task): Promise<void> {
         }
         
         const forceReplace = await vscode.window.showQuickPick(
-            ['No - Append to existing subtasks', 'Yes - Replace existing subtasks'],
+            ['否 - 追加到现有子任务', '是 - 替换现有子任务'],
             {
                 placeHolder,
                 ignoreFocusOut: true
@@ -1833,7 +1833,7 @@ async function expandTaskWithFallback(task: Task): Promise<void> {
             return; // User cancelled
         }
 
-        const force = forceReplace.startsWith('Yes');
+        const force = forceReplace.startsWith('是');
 
         // Log expansion operation with tag context
         log(`Expanding task ${task.id} with force=${force} in tag context: ${tagContext.currentTag}`);
@@ -1859,11 +1859,11 @@ async function expandTaskWithFallback(task: Task): Promise<void> {
 async function createTaskInputForm(): Promise<TaskFormData | undefined> {
     // Step 1: Task title (required)
     const title = await vscode.window.showInputBox({
-        prompt: 'Enter task title (required)',
-        placeHolder: 'e.g., Implement user authentication',
+        prompt: '输入任务标题（必填）',
+        placeHolder: '例如：实现用户认证',
         validateInput: (value) => {
             if (!value || value.trim().length === 0) {
-                return 'Task title is required';
+                return '任务标题为必填项';
             }
             return null;
         }
@@ -1875,20 +1875,20 @@ async function createTaskInputForm(): Promise<TaskFormData | undefined> {
 
     // Step 2: Description
     const description = await vscode.window.showInputBox({
-        prompt: 'Enter task description (optional)',
-        placeHolder: 'e.g., Add JWT-based authentication system for users',
+        prompt: '输入任务描述（可选）',
+        placeHolder: '例如：为用户添加基于 JWT 的认证系统',
     });
 
     // Step 3: Priority
     const priority = await vscode.window.showQuickPick(
         [
-            { label: 'High', detail: 'Important and urgent' },
-            { label: 'Medium', detail: 'Normal priority (default)' },
-            { label: 'Low', detail: 'Can wait' },
-            { label: 'Critical', detail: 'Blocking other work' }
+            { label: 'High', detail: '重要且紧急' },
+            { label: 'Medium', detail: '正常优先级（默认）' },
+            { label: 'Low', detail: '可以等待' },
+            { label: 'Critical', detail: '阻塞其他工作' }
         ],
         {
-            placeHolder: 'Select task priority',
+            placeHolder: '选择任务优先级',
             canPickMany: false
         }
     );
@@ -1896,12 +1896,12 @@ async function createTaskInputForm(): Promise<TaskFormData | undefined> {
     // Step 4: Status
     const status = await vscode.window.showQuickPick(
         [
-            { label: 'todo', detail: 'Ready to work on (default)' },
-            { label: 'in-progress', detail: 'Currently being worked on' },
-            { label: 'blocked', detail: 'Cannot proceed' }
+            { label: 'todo', detail: '准备开始（默认）' },
+            { label: 'in-progress', detail: '正在处理中' },
+            { label: 'blocked', detail: '无法继续' }
         ],
         {
-            placeHolder: 'Select task status',
+            placeHolder: '选择任务状态',
             canPickMany: false
         }
     );
@@ -1913,14 +1913,14 @@ async function createTaskInputForm(): Promise<TaskFormData | undefined> {
     if (tagContext.isTaggedFormat && tagContext.availableTags.length > 1) {
         const tagOptions = tagContext.availableTags.map(tag => ({
             label: tag,
-            detail: tag === tagContext.currentTag ? 'Current tag' : 'Available tag',
+            detail: tag === tagContext.currentTag ? '当前标签' : '可用标签',
             picked: tag === tagContext.currentTag
         }));
         
         const selectedTagOption = await vscode.window.showQuickPick(
             tagOptions,
             {
-                placeHolder: `Select tag context for new task (current: ${tagContext.currentTag})`,
+                placeHolder: `选择新任务的标签上下文（当前：${tagContext.currentTag}）`,
                 canPickMany: false
             }
         );
@@ -1934,7 +1934,7 @@ async function createTaskInputForm(): Promise<TaskFormData | undefined> {
     const tasks = await taskMasterClient.getTasks();
     const availableTasks = tasks.map(task => ({
         label: `${task.id}: ${task.title}`,
-        detail: `Status: ${task.status}, Priority: ${task.priority}`,
+        detail: `状态：${task.status}，优先级：${task.priority}`,
         taskId: task.id
     }));
 
@@ -1943,7 +1943,7 @@ async function createTaskInputForm(): Promise<TaskFormData | undefined> {
         const selectedDeps = await vscode.window.showQuickPick(
             availableTasks,
             {
-                placeHolder: 'Select dependencies (optional) - tasks that must be completed first',
+                placeHolder: '选择依赖（可选）- 必须先完成的任务',
                 canPickMany: true
             }
         );
@@ -1966,11 +1966,11 @@ async function createTaskInputForm(): Promise<TaskFormData | undefined> {
 async function createSubtaskInputForm(): Promise<SubtaskFormData | undefined> {
     // Step 1: Subtask title (required)
     const title = await vscode.window.showInputBox({
-        prompt: 'Enter subtask title (required)',
-        placeHolder: 'e.g., Set up JWT token validation',
+        prompt: '输入子任务标题（必填）',
+        placeHolder: '例如：设置 JWT 令牌验证',
         validateInput: (value) => {
             if (!value || value.trim().length === 0) {
-                return 'Subtask title is required';
+                return '子任务标题为必填项';
             }
             return null;
         }
@@ -1982,15 +1982,15 @@ async function createSubtaskInputForm(): Promise<SubtaskFormData | undefined> {
 
     // Step 2: Description
     const description = await vscode.window.showInputBox({
-        prompt: 'Enter subtask description (optional)',
-        placeHolder: 'e.g., Implement middleware to validate JWT tokens',
+        prompt: '输入子任务描述（可选）',
+        placeHolder: '例如：实现验证 JWT 令牌的中间件',
     });
 
     // Step 3: Priority (simpler for subtasks)
     const priority = await vscode.window.showQuickPick(
         ['high', 'medium', 'low'],
         {
-            placeHolder: 'Select subtask priority (default: medium)',
+            placeHolder: '选择子任务优先级（默认：medium）',
             canPickMany: false
         }
     );
@@ -1999,7 +1999,7 @@ async function createSubtaskInputForm(): Promise<SubtaskFormData | undefined> {
     const status = await vscode.window.showQuickPick(
         ['todo', 'in-progress', 'done'],
         {
-            placeHolder: 'Select subtask status (default: todo)',
+            placeHolder: '选择子任务状态（默认：todo）',
             canPickMany: false
         }
     );
@@ -2117,17 +2117,17 @@ async function deleteTask(task: Task): Promise<void> {
         
         // Confirmation dialog with tag context
         const confirmMessage = tagContext.isTaggedFormat 
-            ? `[Tag: ${tagContext.currentTag}] Are you sure you want to delete Task ${task.id}: "${task.title}"?`
-            : `Are you sure you want to delete Task ${task.id}: "${task.title}"?`;
+            ? `[标签：${tagContext.currentTag}] 确定要删除任务 ${task.id}："${task.title}"吗？`
+            : `确定要删除任务 ${task.id}："${task.title}"吗？`;
             
         const confirm = await vscode.window.showWarningMessage(
             confirmMessage,
             { modal: true },
-            'Delete',
-            'Cancel'
+            '删除',
+            '取消'
         );
 
-        if (confirm !== 'Delete') {
+        if (confirm !== '删除') {
             return;
         }
 
@@ -2254,7 +2254,7 @@ async function createTaskEditForm(task: Task): Promise<TaskUpdateData | undefine
         const selectedDeps = await vscode.window.showQuickPick(
             availableTasks,
             {
-                placeHolder: 'Select dependencies (tasks that must be completed first)',
+                placeHolder: '选择依赖（必须首先完成的任务）',
                 canPickMany: true
             }
         );
@@ -2459,13 +2459,13 @@ async function setTaskStatus(task: Task, newStatus: TaskStatus): Promise<void> {
         
         // Show status-specific messages
         const statusMessages: { [key: string]: string } = {
-            'todo': `⭕ Task ${task.id} marked as todo`,
-            'in-progress': `🔄 Task ${task.id} marked as in progress`,
-            'completed': `✅ Task ${task.id} marked as completed`,
-            'blocked': `❌ Task ${task.id} marked as blocked`
+            'todo': `⭕ 任务 ${task.id} 已标记为待办`,
+            'in-progress': `🔄 任务 ${task.id} 已标记为进行中`,
+            'completed': `✅ 任务 ${task.id} 已标记为已完成`,
+            'blocked': `❌ 任务 ${task.id} 已标记为已阻塞`
         };
         
-        const message = statusMessages[newStatus] || `📝 Task ${task.id} status changed to ${newStatus}`;
+        const message = statusMessages[newStatus] || `📝 任务 ${task.id} 状态已更改为 ${newStatus}`;
         vscode.window.showInformationMessage(message);
         
         logUserInteraction('Status change completed', { 
@@ -2483,7 +2483,7 @@ async function setTaskStatus(task: Task, newStatus: TaskStatus): Promise<void> {
             targetStatus: newStatus,
             error: error instanceof Error ? error.message : String(error)
         }, 'status-update');
-        vscode.window.showErrorMessage(`Failed to change status: ${error}`);
+        vscode.window.showErrorMessage(`更改状态失败：${error}`);
         throw error;
     }
 }
@@ -2491,10 +2491,10 @@ async function setTaskStatus(task: Task, newStatus: TaskStatus): Promise<void> {
 async function setTaskStatusInteractive(task: Task): Promise<void> {
     try {
         const statusOptions = [
-            { label: 'Todo', detail: 'Not started', value: 'todo' },
-            { label: 'In Progress', detail: 'Currently working on', value: 'in-progress' },
-            { label: 'Completed', detail: 'Finished', value: 'completed' },
-            { label: 'Blocked', detail: 'Waiting on external dependency', value: 'blocked' }
+            { label: '待办', detail: '尚未开始', value: 'todo' },
+            { label: '进行中', detail: '正在处理', value: 'in-progress' },
+            { label: '已完成', detail: '已结束', value: 'completed' },
+            { label: '已阻塞', detail: '等待外部依赖', value: 'blocked' }
         ];
         
         const currentStatus = task.status || 'todo';
@@ -2509,9 +2509,9 @@ async function setTaskStatusInteractive(task: Task): Promise<void> {
         }, 'status-dialog');
         
         // Create placeholder text that includes tag context information
-        let placeHolder = `Current status: ${currentStatus}. Select new status:`;
+        let placeHolder = `当前状态：${currentStatus}。选择新状态：`;
         if (tagContext.isTaggedFormat) {
-            placeHolder = `[Tag: ${tagContext.currentTag}] Current status: ${currentStatus}. Select new status:`;
+            placeHolder = `[标签：${tagContext.currentTag}] 当前状态：${currentStatus}。选择新状态：`;
         }
         
         const status = await vscode.window.showQuickPick(
@@ -2561,16 +2561,16 @@ async function changePriority(task: Task): Promise<void> {
         logTagOperation('Change Priority', tagContext, { taskId: task.id, currentPriority: task.priority });
         
         const priorityOptions = [
-            { label: 'Critical', detail: 'Blocking other work', value: 'critical' },
-            { label: 'High', detail: 'Important and urgent', value: 'high' },
-            { label: 'Medium', detail: 'Normal priority', value: 'medium' },
-            { label: 'Low', detail: 'Can wait', value: 'low' }
+            { label: '严重', detail: '阻塞其他工作', value: 'critical' },
+            { label: '高', detail: '重要且紧急', value: 'high' },
+            { label: '中', detail: '正常优先级', value: 'medium' },
+            { label: '低', detail: '可以等待', value: 'low' }
         ];
         
         const currentPriority = task.priority || 'medium';
         const placeHolder = getTagAwarePlaceholder(
             tagContext, 
-            `Current priority: ${currentPriority}. Select new priority:`
+            `当前优先级：${currentPriority}。选择新优先级：`
         );
         
         const priority = await vscode.window.showQuickPick(
@@ -2598,13 +2598,13 @@ async function changePriority(task: Task): Promise<void> {
         taskProvider.refresh();
         
         const successMessage = formatTagSuccessMessage(
-            `⭐ Task ${task.id} priority changed to ${priority.value}`,
+            `⭐ 任务 ${task.id} 优先级已更改为 ${priority.value}`,
             tagContext
         );
         vscode.window.showInformationMessage(successMessage);
 
     } catch (error) {
-        vscode.window.showErrorMessage(`Failed to change priority: ${error}`);
+        vscode.window.showErrorMessage(`更改优先级失败：${error}`);
     }
 }
 
@@ -2622,14 +2622,14 @@ async function setDependencies(task: Task): Promise<void> {
             .filter(t => t.id.toString() !== task.id.toString()) // Don't include self
             .map(t => ({
                 label: `${t.id}: ${t.title}`,
-                detail: `Status: ${t.status}, Priority: ${t.priority}`,
+                detail: `状态：${t.status}，优先级：${t.priority}`,
                 taskId: t.id,
                 picked: task.dependencies ? task.dependencies.includes(t.id.toString()) : false
             }));
 
         if (availableTasks.length === 0) {
             const message = formatTagSuccessMessage(
-                'No other tasks available to set as dependencies.',
+                '没有其他可用任务可设置为依赖。',
                 tagContext
             );
             vscode.window.showInformationMessage(message);
@@ -2638,7 +2638,7 @@ async function setDependencies(task: Task): Promise<void> {
 
         const placeHolder = getTagAwarePlaceholder(
             tagContext,
-            'Select dependencies (tasks that must be completed before this task)'
+            '选择依赖（必须在此任务之前完成的任务）'
         );
         
         const selectedDeps = await vscode.window.showQuickPick(
@@ -2835,23 +2835,23 @@ async function switchTagHandler(): Promise<void> {
         logTagOperation('Switch Tag Handler', tagContext);
         
         if (!tagContext.isTaggedFormat) {
-            vscode.window.showInformationMessage('This project is not using the tagged task format. No tags to switch between.');
+            vscode.window.showInformationMessage('此项目未使用标签任务格式。没有可切换的标签。');
             return;
         }
         
         if (tagContext.availableTags.length <= 1) {
-            vscode.window.showInformationMessage('Only one tag available. Create additional tags to switch between them.');
+            vscode.window.showInformationMessage('只有一个可用标签。创建更多标签以在它们之间切换。');
             return;
         }
         
         const tagOptions = tagContext.availableTags.map(tag => ({
             label: tag,
-            detail: tag === tagContext.currentTag ? '✓ Current tag' : 'Available tag',
-            description: tag === 'master' ? 'Default tag' : ''
+            detail: tag === tagContext.currentTag ? '✓ 当前标签' : '可用标签',
+            description: tag === 'master' ? '默认标签' : ''
         }));
         
         const selectedTag = await vscode.window.showQuickPick(tagOptions, {
-            placeHolder: `Current tag: ${tagContext.currentTag} • Select a tag to switch to`,
+            placeHolder: `当前标签：${tagContext.currentTag} • 选择要切换到的标签`,
             ignoreFocusOut: true
         });
         
@@ -2860,7 +2860,7 @@ async function switchTagHandler(): Promise<void> {
         }
         
         if (selectedTag.label === tagContext.currentTag) {
-            vscode.window.showInformationMessage(`Already using tag: ${selectedTag.label}`);
+            vscode.window.showInformationMessage(`已在使用标签：${selectedTag.label}`);
             return;
         }
         
@@ -2870,13 +2870,13 @@ async function switchTagHandler(): Promise<void> {
         // Update status bar to reflect the tag change
         tagStatusBar.forceUpdate();
         
-        const successMessage = `🏷️ Switched to tag: ${selectedTag.label}`;
+        const successMessage = `🏷️ 已切换到标签：${selectedTag.label}`;
         vscode.window.showInformationMessage(successMessage);
         
         log(`Successfully switched from tag '${tagContext.currentTag}' to '${selectedTag.label}'`);
         
     } catch (error) {
-        vscode.window.showErrorMessage(`Failed to switch tag: ${error}`);
+        vscode.window.showErrorMessage(`切换标签失败：${error}`);
         log(`Error in switchTagHandler: ${error}`);
     }
 }
@@ -2887,25 +2887,25 @@ async function createTagHandler(): Promise<void> {
         logTagOperation('Create Tag Handler', tagContext);
         
         if (!tagContext.isTaggedFormat) {
-            vscode.window.showInformationMessage('This project is not using the tagged task format. Initialize tagged format first.');
+            vscode.window.showInformationMessage('此项目未使用标签任务格式。请先初始化标签格式。');
             return;
         }
         
         const tagName = await vscode.window.showInputBox({
-            placeHolder: 'Enter new tag name (e.g., feature-branch, sprint-2)',
-            prompt: 'Create a new tag for organizing tasks',
+            placeHolder: '输入新标签名称（例如：feature-branch、sprint-2）',
+            prompt: '创建新标签以组织任务',
             validateInput: (value: string) => {
                 if (!value || value.trim().length === 0) {
-                    return 'Tag name cannot be empty';
+                    return '标签名称不能为空';
                 }
                 if (value.includes(' ')) {
-                    return 'Tag name cannot contain spaces. Use hyphens or underscores instead.';
+                    return '标签名称不能包含空格。请使用连字符或下划线。';
                 }
                 if (tagContext.availableTags.includes(value.trim())) {
-                    return 'Tag already exists. Choose a different name.';
+                    return '标签已存在。请选择不同的名称。';
                 }
                 if (value.length > 50) {
-                    return 'Tag name is too long. Keep it under 50 characters.';
+                    return '标签名称过长。请保持在 50 个字符以内。';
                 }
                 return null;
             }
@@ -2922,14 +2922,14 @@ async function createTagHandler(): Promise<void> {
         
         // Ask if user wants to switch to the new tag
         const switchToNew = await vscode.window.showInformationMessage(
-            `✅ Tag '${trimmedTagName}' created successfully!`,
-            'Switch to New Tag',
-            'Stay on Current Tag'
+            `✅ 标签 '${trimmedTagName}' 创建成功！`,
+            '切换到新标签',
+            '保持当前标签'
         );
         
-        if (switchToNew === 'Switch to New Tag') {
+        if (switchToNew === '切换到新标签') {
             await taskProvider.switchTag(trimmedTagName);
-            vscode.window.showInformationMessage(`🏷️ Switched to new tag: ${trimmedTagName}`);
+            vscode.window.showInformationMessage(`🏷️ 已切换到新标签：${trimmedTagName}`);
         }
         
         // Update status bar to reflect the changes
@@ -2938,7 +2938,7 @@ async function createTagHandler(): Promise<void> {
         log(`Successfully created tag '${trimmedTagName}'`);
         
     } catch (error) {
-        vscode.window.showErrorMessage(`Failed to create tag: ${error}`);
+        vscode.window.showErrorMessage(`创建标签失败：${error}`);
         log(`Error in createTagHandler: ${error}`);
     }
 }
@@ -2949,7 +2949,7 @@ async function deleteTagHandler(): Promise<void> {
         logTagOperation('Delete Tag Handler', tagContext);
         
         if (!tagContext.isTaggedFormat) {
-            vscode.window.showInformationMessage('This project is not using the tagged task format. No tags to delete.');
+            vscode.window.showInformationMessage('此项目未使用标签任务格式。没有可删除的标签。');
             return;
         }
         
@@ -2957,18 +2957,18 @@ async function deleteTagHandler(): Promise<void> {
         const deletableTags = tagContext.availableTags.filter(tag => tag !== 'master');
         
         if (deletableTags.length === 0) {
-            vscode.window.showInformationMessage('No tags available for deletion. The master tag cannot be deleted.');
+            vscode.window.showInformationMessage('没有可删除的标签。主标签不能被删除。');
             return;
         }
         
         const tagOptions = deletableTags.map(tag => ({
             label: tag,
-            detail: tag === tagContext.currentTag ? '⚠️ Current tag - will switch to master after deletion' : 'Available for deletion',
-            description: 'Click to delete this tag and all its tasks'
+            detail: tag === tagContext.currentTag ? '⚠️ 当前标签 - 删除后将切换到主标签' : '可删除',
+            description: '点击删除此标签及其所有任务'
         }));
         
         const selectedTag = await vscode.window.showQuickPick(tagOptions, {
-            placeHolder: 'Select a tag to delete (master tag cannot be deleted)',
+            placeHolder: '选择要删除的标签（主标签不能删除）',
             ignoreFocusOut: true
         });
         
@@ -2978,17 +2978,17 @@ async function deleteTagHandler(): Promise<void> {
         
         // Confirm deletion
         const confirmMessage = selectedTag.label === tagContext.currentTag
-            ? `⚠️ You are about to delete the current tag '${selectedTag.label}' and ALL its tasks. You will be switched to the master tag. This action cannot be undone.`
-            : `⚠️ You are about to delete tag '${selectedTag.label}' and ALL its tasks. This action cannot be undone.`;
+            ? `⚠️ 您即将删除当前标签 '${selectedTag.label}' 及其所有任务。您将被切换到主标签。此操作无法撤销。`
+            : `⚠️ 您即将删除标签 '${selectedTag.label}' 及其所有任务。此操作无法撤销。`;
             
         const confirmation = await vscode.window.showWarningMessage(
             confirmMessage,
             { modal: true },
-            'Delete Tag',
-            'Cancel'
+            '删除标签',
+            '取消'
         );
         
-        if (confirmation !== 'Delete Tag') {
+        if (confirmation !== '删除标签') {
             return; // User cancelled
         }
         
@@ -2998,9 +2998,9 @@ async function deleteTagHandler(): Promise<void> {
         // If we deleted the current tag, switch to master
         if (selectedTag.label === tagContext.currentTag) {
             await taskProvider.switchTag('master');
-            vscode.window.showInformationMessage(`🗑️ Tag '${selectedTag.label}' deleted. Switched to master tag.`);
+            vscode.window.showInformationMessage(`🗑️ 标签 '${selectedTag.label}' 已删除。已切换到主标签。`);
         } else {
-            vscode.window.showInformationMessage(`🗑️ Tag '${selectedTag.label}' deleted successfully.`);
+            vscode.window.showInformationMessage(`🗑️ 标签 '${selectedTag.label}' 删除成功。`);
         }
         
         // Update status bar to reflect the changes
@@ -3009,7 +3009,7 @@ async function deleteTagHandler(): Promise<void> {
         log(`Successfully deleted tag '${selectedTag.label}'`);
         
     } catch (error) {
-        vscode.window.showErrorMessage(`Failed to delete tag: ${error}`);
+        vscode.window.showErrorMessage(`删除标签失败：${error}`);
         log(`Error in deleteTagHandler: ${error}`);
     }
 }
@@ -3020,7 +3020,7 @@ async function listTagsHandler(): Promise<void> {
         logTagOperation('List Tags Handler', tagContext);
         
         if (!tagContext.isTaggedFormat) {
-            vscode.window.showInformationMessage('This project is not using the tagged task format. No tags available.');
+            vscode.window.showInformationMessage('此项目未使用标签任务格式。没有可用标签。');
             return;
         }
         
@@ -3046,9 +3046,9 @@ async function listTagsHandler(): Promise<void> {
                 }
             }
             
-            const currentIndicator = isCurrentTag ? ' ✓ (current)' : '';
-            const masterIndicator = tagName === 'master' ? ' (default)' : '';
-            tagInfoList.push(`🏷️ ${tagName}${currentIndicator}${masterIndicator} - ${taskCount} task(s)`);
+            const currentIndicator = isCurrentTag ? ' ✓ (当前)' : '';
+            const masterIndicator = tagName === 'master' ? ' (默认)' : '';
+            tagInfoList.push(`🏷️ ${tagName}${currentIndicator}${masterIndicator} - ${taskCount} 个任务`);
         }
         
         // Switch back to original tag if we switched
@@ -3056,25 +3056,25 @@ async function listTagsHandler(): Promise<void> {
             await taskMasterClient.switchTag(tagContext.currentTag);
         }
         
-        const tagListMessage = `Available Tags:\n\n${tagInfoList.join('\n')}\n\nTotal: ${tagContext.availableTags.length} tag(s)`;
+        const tagListMessage = `可用标签：\n\n${tagInfoList.join('\n')}\n\n总计：${tagContext.availableTags.length} 个标签`;
         
         const action = await vscode.window.showInformationMessage(
             tagListMessage,
-            'Switch Tag',
-            'Create New Tag',
-            'Close'
+            '切换标签',
+            '创建新标签',
+            '关闭'
         );
         
-        if (action === 'Switch Tag') {
+        if (action === '切换标签') {
             await switchTagHandler();
-        } else if (action === 'Create New Tag') {
+        } else if (action === '创建新标签') {
             await createTagHandler();
         }
         
         log(`Listed ${tagContext.availableTags.length} tags`);
         
     } catch (error) {
-        vscode.window.showErrorMessage(`Failed to list tags: ${error}`);
+        vscode.window.showErrorMessage(`列出标签失败：${error}`);
         log(`Error in listTagsHandler: ${error}`);
     }
 }
