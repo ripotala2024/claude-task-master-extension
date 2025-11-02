@@ -51,7 +51,7 @@ echo "🧹 Step 3: Cleaning up old versions..."
 if [[ -f "$VSIX_FILE" ]]; then
     cp "$VSIX_FILE" "$LATEST_FILE"
     echo "✅ Created $LATEST_FILE"
-    
+
     # Delete all vsix files except the current version and latest
     find . -maxdepth 1 -name "$EXTENSION_NAME-*.vsix" -type f ! -name "$VSIX_FILE" ! -name "$LATEST_FILE" -delete
     echo "✅ Removed old versions"
@@ -59,6 +59,21 @@ if [[ -f "$VSIX_FILE" ]]; then
 else
     echo "❌ Could not find $VSIX_FILE"
     exit 1
+fi
+
+# Step 3.5: Upload to OSS
+echo "☁️  Step 3.5: Uploading to OSS..."
+if command -v ossutil &> /dev/null; then
+    if ossutil cp -f "$LATEST_FILE" oss://lingmiao-download/install/; then
+        echo "✅ Uploaded $LATEST_FILE to OSS successfully"
+        echo ""
+    else
+        echo "⚠️  OSS upload failed, but continuing with installation..."
+        echo ""
+    fi
+else
+    echo "⚠️  ossutil not found, skipping OSS upload"
+    echo ""
 fi
 
 # Step 4: Install the extension
