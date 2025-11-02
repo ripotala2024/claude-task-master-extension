@@ -65,6 +65,141 @@ async function checkTaskMasterInstalled(): Promise<boolean> {
     }
 }
 
+/**
+ * Execute task-master init and automatically reload window when complete
+ * Uses Shell Integration API when available, falls back to FileSystemWatcher
+ */
+async function executeTaskMasterInit(workspaceFolder: vscode.WorkspaceFolder): Promise<void> {
+    const taskmasterPath = path.join(workspaceFolder.uri.fsPath, '.taskmaster');
+
+    // Check if directory already exists
+    if (fs.existsSync(taskmasterPath)) {
+        log('.taskmaster directory already exists');
+        const selection = await vscode.window.showInformationMessage(
+            '.taskmaster 目录已存在。需要重新加载窗口吗？',
+            '重新加载窗口',
+            '取消'
+        );
+        if (selection === '重新加载窗口') {
+            await vscode.commands.executeCommand('workbench.action.reloadWindow');
+        }
+        return;
+    }
+
+    // Create terminal
+    const terminal = vscode.window.createTerminal({
+        name: 'Task Master 初始化',
+        cwd: workspaceFolder.uri.fsPath
+    });
+    terminal.show();
+
+    // Try Shell Integration first (VS Code 1.93+)
+    if (terminal.shellIntegration) {
+        log('Using Shell Integration API to track task-master init completion');
+
+        const execution = terminal.shellIntegration.executeCommand('task-master init');
+
+        // Setup timeout (30 seconds)
+        const timeout = setTimeout(() => {
+            log('task-master init timeout (30s)');
+            vscode.window.showWarningMessage(
+                'Task Master 初始化时间较长，请在完成后手动重新加载窗口',
+                '重新加载窗口'
+            ).then(selection => {
+                if (selection === '重新加载窗口') {
+                    vscode.commands.executeCommand('workbench.action.reloadWindow');
+                }
+            });
+        }, 30000);
+
+        // Listen for command completion
+        const disposable = vscode.window.onDidEndTerminalShellExecution(async (e) => {
+            if (e.execution === execution) {
+                clearTimeout(timeout);
+                log(`task-master init completed with exit code: ${e.exitCode}`);
+
+                if (e.exitCode === 0) {
+                    // Wait for file system to stabilize
+                    await new Promise(resolve => setTimeout(resolve, 500));
+
+                    log('Initialization successful, reloading window');
+                    vscode.window.showInformationMessage('Task Master 初始化完成，正在重新加载窗口...');
+
+                    // Brief delay to let user see the message
+                    await new Promise(resolve => setTimeout(resolve, 500));
+
+                    await vscode.commands.executeCommand('workbench.action.reloadWindow');
+                } else if (e.exitCode === 130) {
+                    // User cancelled (Ctrl+C)
+                    log('User cancelled initialization');
+                    vscode.window.showInformationMessage('已取消初始化');
+                } else {
+                    // Initialization failed
+                    log(`Initialization failed with exit code ${e.exitCode}`);
+                    vscode.window.showErrorMessage(`Task Master 初始化失败（退出码: ${e.exitCode}）`);
+                }
+
+                disposable.dispose();
+            }
+        });
+    } else {
+        // Fallback: Use FileSystemWatcher to detect .taskmaster directory creation
+        log('Shell Integration not available, using FileSystemWatcher fallback');
+
+        terminal.sendText('task-master init', true);
+
+        // Create watcher for .taskmaster directory
+        const taskmasterWatcher = vscode.workspace.createFileSystemWatcher(
+            new vscode.RelativePattern(workspaceFolder, '.taskmaster')
+        );
+
+        // Setup timeout (30 seconds)
+        const timeout = setTimeout(() => {
+            log('task-master init timeout (30s) - FileSystemWatcher');
+            vscode.window.showWarningMessage(
+                'Task Master 初始化时间较长，请在完成后手动重新加载窗口',
+                '重新加载窗口'
+            ).then(selection => {
+                if (selection === '重新加载窗口') {
+                    vscode.commands.executeCommand('workbench.action.reloadWindow');
+                }
+            });
+            taskmasterWatcher.dispose();
+        }, 30000);
+
+        taskmasterWatcher.onDidCreate(async (uri) => {
+            clearTimeout(timeout);
+            log('Detected .taskmaster directory creation at: ' + uri.fsPath);
+
+            // Wait for file system to stabilize (ensure all files are written)
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Verify initialization success by checking key files
+            const tasksJsonPath = path.join(uri.fsPath, 'tasks', 'tasks.json');
+            const configPath = path.join(uri.fsPath, 'config.json');
+
+            if (fs.existsSync(tasksJsonPath) || fs.existsSync(configPath)) {
+                log('Initialization verified (key files exist), reloading window');
+            } else {
+                log('Key files not found yet, waiting a bit longer...');
+                // Wait another 2 seconds for slower file systems
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+
+            vscode.window.showInformationMessage('Task Master 初始化完成，正在重新加载窗口...');
+
+            // Brief delay to let user see the message
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            await vscode.commands.executeCommand('workbench.action.reloadWindow');
+
+            taskmasterWatcher.dispose();
+        });
+
+        vscode.window.showInformationMessage('正在初始化 task-master-ai...');
+    }
+}
+
 export function activate(context: vscode.ExtensionContext) {
     initializeLogger();
     log('🚀 Claude Task Master extension is being activated');
@@ -114,6 +249,27 @@ export function activate(context: vscode.ExtensionContext) {
                     });
                     terminal.show();
                     terminal.sendText('task-master init', true);
+
+                    // Monitor terminal close event
+                    const disposable = vscode.window.onDidCloseTerminal((closedTerminal) => {
+                        if (closedTerminal === terminal) {
+                            log('Task Master initialization terminal closed, prompting user to reload window');
+                            vscode.window.showInformationMessage(
+                                'Task Master 初始化完成，是否重新加载窗口以激活扩展？',
+                                '重新加载',
+                                '稍后'
+                            ).then(selection => {
+                                if (selection === '重新加载') {
+                                    log('User confirmed window reload');
+                                    vscode.commands.executeCommand('workbench.action.reloadWindow');
+                                } else {
+                                    log('User chose to reload later');
+                                }
+                            });
+                            disposable.dispose();
+                        }
+                    });
+                    context.subscriptions.push(disposable);
 
                     vscode.window.showInformationMessage('正在初始化 task-master-ai...');
                 }
@@ -238,6 +394,38 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('claudeTaskMaster.addTask', async (categoryItem) => {
             log(`Executing command: claudeTaskMaster.addTask for category: ${categoryItem?.label || 'none'}`);
             await addNewTask(categoryItem);
+        }),
+
+        // Initialize project command
+        vscode.commands.registerCommand('claudeTaskMaster.initializeProject', async () => {
+            const cmdInfo = logCommandStart('claudeTaskMaster.initializeProject');
+            logUserInteraction('Initialize project initiated', null, 'initialization');
+            try {
+                // Check if task-master-ai is installed
+                log('Checking if task-master-ai is installed...');
+                const isInstalled = await checkTaskMasterInstalled();
+
+                if (!isInstalled) {
+                    vscode.window.showWarningMessage(
+                        'task-master-ai 未安装。请先安装：npm install -g task-master-ai',
+                        '打开终端'
+                    ).then(selection => {
+                        if (selection === '打开终端') {
+                            const terminal = vscode.window.createTerminal('Task Master 安装');
+                            terminal.show();
+                            terminal.sendText('npm install -g task-master-ai');
+                        }
+                    });
+                    logCommandEnd(cmdInfo, false, new Error('task-master-ai not installed'));
+                } else {
+                    // Execute task-master init with automatic window reload
+                    await executeTaskMasterInit(workspaceFolder);
+                    logCommandEnd(cmdInfo, true, undefined, { success: true, action: 'initialization-started' });
+                }
+            } catch (error) {
+                vscode.window.showErrorMessage('初始化失败：' + (error instanceof Error ? error.message : String(error)));
+                logCommandEnd(cmdInfo, false, error instanceof Error ? error : new Error(String(error)));
+            }
         }),
 
         // Tag management commands

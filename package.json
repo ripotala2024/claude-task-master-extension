@@ -413,7 +413,9 @@
     "test": "node ./out/test/runTest.js",
     "test:coverage": "nyc --reporter=text --reporter=html npm test",
     "build": "node scripts/build.js",
-    "package": "vsce package",
+    "package": "npm version patch --no-git-tag-version && vsce package",
+    "package:minor": "npm version minor --no-git-tag-version && vsce package",
+    "package:major": "npm version major --no-git-tag-version && vsce package",
     "dev-install": "node scripts/dev-install.js",
     "dev": "npm run dev-install"
   },
