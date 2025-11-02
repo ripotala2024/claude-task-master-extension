@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp________read_memory"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
