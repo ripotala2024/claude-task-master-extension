@@ -250,3 +250,5 @@ logs
 scripts/generate-vscodeignore.js
 
 .specstory/
+# 灵妙AI开发助手自动添加
+log/

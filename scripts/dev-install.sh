@@ -4,7 +4,6 @@
 # This script compiles, packages, and installs the extension automatically
 
 EXTENSION_NAME="claude-task-master-extension"
-VSIX_FILE="$EXTENSION_NAME-1.3.2.vsix"
 
 # Get the script directory and project root
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -16,6 +15,14 @@ echo ""
 
 # Change to project root directory
 cd "$PROJECT_ROOT" || exit 1
+
+# Get version from package.json
+VERSION=$(node -p "require('./package.json').version")
+VSIX_FILE="$EXTENSION_NAME-$VERSION.vsix"
+LATEST_FILE="$EXTENSION_NAME-latest.vsix"
+
+echo "📌 Current version: $VERSION"
+echo ""
 
 # Step 1: Compile TypeScript
 echo "📦 Step 1: Compiling TypeScript..."
@@ -37,8 +44,25 @@ else
     exit 1
 fi
 
-# Step 3: Install the extension
-echo "🔧 Step 3: Installing extension..."
+# Step 3: Clean up old versions and create latest copy
+echo "🧹 Step 3: Cleaning up old versions..."
+
+# Copy current version to latest
+if [[ -f "$VSIX_FILE" ]]; then
+    cp "$VSIX_FILE" "$LATEST_FILE"
+    echo "✅ Created $LATEST_FILE"
+    
+    # Delete all vsix files except the current version and latest
+    find . -maxdepth 1 -name "$EXTENSION_NAME-*.vsix" -type f ! -name "$VSIX_FILE" ! -name "$LATEST_FILE" -delete
+    echo "✅ Removed old versions"
+    echo ""
+else
+    echo "❌ Could not find $VSIX_FILE"
+    exit 1
+fi
+
+# Step 4: Install the extension
+echo "🔧 Step 4: Installing extension..."
 
 # Try to find VS Code or Cursor command
 CODE_COMMAND=""

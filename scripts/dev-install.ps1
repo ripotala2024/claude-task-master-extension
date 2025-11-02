@@ -4,7 +4,6 @@
 # This script compiles, packages, and installs the extension automatically
 
 $EXTENSION_NAME = "claude-task-master-extension"
-$VSIX_FILE = "$EXTENSION_NAME-1.3.2.vsix"
 
 # Get the script directory and project root
 $SCRIPT_DIR = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -16,6 +15,15 @@ Write-Host ""
 
 # Change to project root directory
 Set-Location $PROJECT_ROOT
+
+# Get version from package.json
+$packageJson = Get-Content "package.json" -Raw | ConvertFrom-Json
+$VERSION = $packageJson.version
+$VSIX_FILE = "$EXTENSION_NAME-$VERSION.vsix"
+$LATEST_FILE = "$EXTENSION_NAME-latest.vsix"
+
+Write-Host "📌 Current version: $VERSION" -ForegroundColor Cyan
+Write-Host ""
 
 # Step 1: Compile TypeScript
 Write-Host "📦 Step 1: Compiling TypeScript..." -ForegroundColor Yellow
@@ -45,8 +53,30 @@ try {
     exit 1
 }
 
-# Step 3: Find VS Code or Cursor
-Write-Host "🔧 Step 3: Installing extension..." -ForegroundColor Yellow
+# Step 3: Clean up old versions and create latest copy
+Write-Host "🧹 Step 3: Cleaning up old versions..." -ForegroundColor Yellow
+try {
+    if (Test-Path $VSIX_FILE) {
+        # Copy current version to latest
+        Copy-Item $VSIX_FILE $LATEST_FILE -Force
+        Write-Host "✅ Created $LATEST_FILE" -ForegroundColor Green
+        
+        # Delete all vsix files except the current version and latest
+        Get-ChildItem -Path "." -Filter "$EXTENSION_NAME-*.vsix" | 
+            Where-Object { $_.Name -ne $VSIX_FILE -and $_.Name -ne $LATEST_FILE } |
+            Remove-Item -Force
+        Write-Host "✅ Removed old versions" -ForegroundColor Green
+        Write-Host ""
+    } else {
+        throw "Could not find $VSIX_FILE"
+    }
+} catch {
+    Write-Host "❌ Cleanup failed: $_" -ForegroundColor Red
+    exit 1
+}
+
+# Step 4: Find VS Code or Cursor
+Write-Host "🔧 Step 4: Installing extension..." -ForegroundColor Yellow
 
 $codeCommand = $null
 

@@ -4,6 +4,8 @@ import { TaskMasterClient } from './taskMasterClient';
 import { TagStatusBarItem } from './statusBar';
 import * as path from 'path';
 import * as fs from 'fs';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 import { initializeLogger, disposeLogger, log } from './logger';
 import { 
     Task, 
@@ -52,6 +54,17 @@ function logCommandEnd(commandInfo: CommandInfo, success: boolean = true, error?
     log(`⏹️  COMMAND END [${duration}ms] ${commandInfo.command} - ${status}${errorInfo}${resultInfo}`);
 }
 
+// Helper function to check if task-master-ai is installed
+const execAsync = promisify(exec);
+async function checkTaskMasterInstalled(): Promise<boolean> {
+    try {
+        await execAsync('task-master --version', { timeout: 5000 });
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
 export function activate(context: vscode.ExtensionContext) {
     initializeLogger();
     log('🚀 Claude Task Master extension is being activated');
@@ -77,12 +90,33 @@ export function activate(context: vscode.ExtensionContext) {
             '此扩展需要 task-master-ai 项目。初始化 task-master-ai 开始使用。',
             '了解 Task Master AI',
             '打开终端'
-        ).then(selection => {
+        ).then(async selection => {
             if (selection === '了解 Task Master AI') {
                 vscode.env.openExternal(vscode.Uri.parse('https://github.com/eyaltoledano/claude-task-master'));
             } else if (selection === '打开终端') {
-                vscode.commands.executeCommand('workbench.action.terminal.new');
-                vscode.window.showInformationMessage('运行 "npm install -g task-master-ai" 然后 "task-master init" 或使用 Claude AI 聊天与 task-master-ai MCP 进行初始化。');
+                // Check if task-master-ai is installed
+                log('Checking if task-master-ai is installed...');
+                const isInstalled = await checkTaskMasterInstalled();
+
+                if (!isInstalled) {
+                    // task-master-ai not installed, prompt user to use system initialization
+                    log('task-master-ai not installed, prompting user to use system initialization');
+                    vscode.window.showWarningMessage(
+                        'task-master-ai 未安装。请点击右下角齿轮图标选择"系统初始化"进行安装。',
+                        '我知道了'
+                    );
+                } else {
+                    // task-master-ai is installed, create terminal and auto-execute init command
+                    log('task-master-ai is installed, creating terminal and executing init command');
+                    const terminal = vscode.window.createTerminal({
+                        name: 'Task Master 初始化',
+                        cwd: workspaceFolder.uri.fsPath
+                    });
+                    terminal.show();
+                    terminal.sendText('task-master init', true);
+
+                    vscode.window.showInformationMessage('正在初始化 task-master-ai...');
+                }
             }
         });
         return;
