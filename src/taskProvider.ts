@@ -105,8 +105,8 @@ export class TaskItem extends vscode.TreeItem {
             const completedSubtasks = task.subtasks.filter(subtask => 
                 subtask.status === 'completed' || subtask.status === 'done'
             ).length;
-            tooltip += `\n\n📋 Subtasks: ${completedSubtasks}/${task.subtasks.length} completed`;
-            tooltip += `\n💡 Click the arrow to expand/collapse subtasks`;
+            tooltip += `\n\n📋 子任务：${completedSubtasks}/${task.subtasks.length} 已完成`;
+            tooltip += `\n💡 点击箭头展开/收起子任务`;
         }
         
         return tooltip;
@@ -571,7 +571,7 @@ export class TaskProvider implements vscode.TreeDataProvider<TaskItem> {
                     `🏷️ Tag: ${this.currentTag}`,
                     vscode.TreeItemCollapsibleState.None
                 );
-                tagItem.description = `${this.availableTags.length} tags available • Click to switch`;
+                tagItem.description = `${this.availableTags.length} 个标签可用 • 点击切换`;
                 tagItem.iconPath = new vscode.ThemeIcon('tag', new vscode.ThemeColor('charts.purple'));
                 tagItem.command = {
                     command: 'claudeTaskMaster.switchTag',
@@ -586,11 +586,11 @@ export class TaskProvider implements vscode.TreeDataProvider<TaskItem> {
                 
                 // Main empty message
                 const emptyMessage = this.isTaggedFormat ? 
-                    `No tasks found in tag '${this.currentTag}'` : 
-                    'No tasks found';
+                    `标签 '${this.currentTag}' 中没有找到任务` : 
+                    '没有找到任务';
                 const emptyDescription = this.isTaggedFormat ? 
-                    'Switch tags or create tasks to get started' : 
-                    'Create tasks to get started';
+                    '切换标签或创建任务以开始' : 
+                    '创建任务以开始';
                     
                 const emptyItem = new TaskItem(
                     emptyMessage,
@@ -602,14 +602,14 @@ export class TaskProvider implements vscode.TreeDataProvider<TaskItem> {
 
                 // Quick action: Add Task
                 const addTaskItem = new TaskItem(
-                    '➕ Add New Task',
+                    '➕ 添加新任务',
                     vscode.TreeItemCollapsibleState.None
                 );
-                addTaskItem.description = 'Create your first task';
+                addTaskItem.description = '创建你的第一个任务';
                 addTaskItem.iconPath = new vscode.ThemeIcon('add', new vscode.ThemeColor('charts.green'));
                 addTaskItem.command = {
                     command: 'claudeTaskMaster.addTask',
-                    title: 'Add Task',
+                    title: '添加任务',
                     arguments: []
                 };
                 items.push(addTaskItem);
@@ -617,14 +617,14 @@ export class TaskProvider implements vscode.TreeDataProvider<TaskItem> {
                 // Quick action: Switch Tag (only for tagged format with multiple tags)
                 if (this.isTaggedFormat && this.availableTags.length > 1) {
                     const switchTagItem = new TaskItem(
-                        '🏷️ Switch to Different Tag',
+                        '🏷️ 切换到其他标签',
                         vscode.TreeItemCollapsibleState.None
                     );
-                    switchTagItem.description = `${this.availableTags.length - 1} other tags available`;
+                    switchTagItem.description = `有 ${this.availableTags.length - 1} 个其他标签可用`;
                     switchTagItem.iconPath = new vscode.ThemeIcon('tag', new vscode.ThemeColor('charts.purple'));
                     switchTagItem.command = {
                         command: 'claudeTaskMaster.switchTag',
-                        title: 'Switch Tag',
+                        title: '切换标签',
                         arguments: []
                     };
                     items.push(switchTagItem);
@@ -633,14 +633,14 @@ export class TaskProvider implements vscode.TreeDataProvider<TaskItem> {
                 // Quick action: Create Tag (only for tagged format)
                 if (this.isTaggedFormat) {
                     const createTagItem = new TaskItem(
-                        '🆕 Create New Tag',
+                        '🆕 创建新标签',
                         vscode.TreeItemCollapsibleState.None
                     );
-                    createTagItem.description = 'Create a new tag context';
+                    createTagItem.description = '创建一个新的标签上下文';
                     createTagItem.iconPath = new vscode.ThemeIcon('plus', new vscode.ThemeColor('charts.blue'));
                     createTagItem.command = {
                         command: 'claudeTaskMaster.createTag',
-                        title: 'Create Tag',
+                        title: '创建标签',
                         arguments: []
                     };
                     items.push(createTagItem);
@@ -672,10 +672,10 @@ export class TaskProvider implements vscode.TreeDataProvider<TaskItem> {
                 // Set description based on what's in progress
                 if (currentSubtasks.length > 0) {
                     const firstSubtask = currentSubtasks[0];
-                    currentHeaderItem.description = `Working on subtask ${firstSubtask?.id}`;
+                    currentHeaderItem.description = `正在处理子任务 ${firstSubtask?.id}`;
                 } else if (currentTasks.length > 0) {
                     const firstTask = currentTasks[0];
-                    currentHeaderItem.description = `Working on task ${firstTask?.id}`;
+                    currentHeaderItem.description = `正在处理任务 ${firstTask?.id}`;
                 }
                 
                 items.push(currentHeaderItem);
@@ -793,10 +793,10 @@ export class TaskProvider implements vscode.TreeDataProvider<TaskItem> {
             const errorMessage = error instanceof Error ? error.message : String(error);
             log(`Error getting root items: ${errorMessage}`);
             const errorItem = new TaskItem(
-                'Error loading tasks',
+                '加载任务出错',
                 vscode.TreeItemCollapsibleState.None
             );
-            errorItem.description = 'Check console for details';
+            errorItem.description = '查看控制台了解详情';
             errorItem.iconPath = new vscode.ThemeIcon('error');
             items.push(errorItem);
         }
@@ -864,7 +864,7 @@ export class TaskProvider implements vscode.TreeDataProvider<TaskItem> {
                     parentTaskId = parentTask.id.toString();
                 }
                 
-                const taskType = isSubtask ? 'Subtask' : 'Task';
+                const taskType = isSubtask ? '子任务' : '任务';
                 
                 const nextTaskItem = new TaskItem(
                     `${taskType} ${nextTask.id}: ${nextTask.title}`,

@@ -205,10 +205,10 @@ suite('TaskProvider Test Suite', () => {
         
         const rootItems = await (taskProvider as any).getRootItems();
         
-        // Should show "No tasks found" item
+        // Should show "没有找到任务" item
         assert.ok(rootItems.length > 0, 'Should have at least one item');
         const firstItem = rootItems[0];
-        assert.ok(firstItem.label?.includes('No tasks found'), 'Should show no tasks message');
+        assert.ok(firstItem.label?.includes('没有找到任务'), 'Should show no tasks message');
     });
 
     test('Should expand and collapse items correctly', () => {

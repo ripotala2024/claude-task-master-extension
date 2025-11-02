@@ -62,12 +62,10 @@ pnpm-debug.log*
 # ==================================================
 
 # Task Master AI artifacts (development only)
-.taskmaster/
-.taskmasterconfig
+# .taskmaster/
+# .taskmasterconfig
 scripts/prd.txt
 scripts/task-complexity-report.json
-tasks.json
-tasks/
 
 # Roo AI Framework
 .roo/
@@ -246,9 +244,12 @@ logs
 .idea
 .vscode
 # OS specific
-# Task files
 scripts/generate-vscodeignore.js
 
 .specstory/
 # 灵妙AI开发助手自动添加
 log/
+
+# Task files
+# tasks.json
+# tasks/ 

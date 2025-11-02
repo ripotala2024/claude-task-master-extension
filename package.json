@@ -400,16 +400,6 @@
           "type": "boolean",
           "default": false,
           "description": "禁用 MCP 集成（仅使用基于文件的操作）"
-        },
-        "claudeTaskMaster.preferCLIOnVersionMismatch": {
-          "type": "boolean",
-          "default": true,
-          "description": "检测到 task-master 版本不匹配时优先使用 CLI 而非 MCP"
-        },
-        "claudeTaskMaster.versionCheckInterval": {
-          "type": "number",
-          "default": 300000,
-          "description": "版本兼容性检查频率（毫秒，默认 5 分钟）"
         }
       }
     }

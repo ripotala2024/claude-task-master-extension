@@ -103,27 +103,8 @@ export class TaskMasterClient {
 
     async getTasks(): Promise<Task[]> {
         try {
-            // Check version compatibility first
-            const versionCheck = await this.checkVersionCompatibility();
-            if (!versionCheck.compatible && versionCheck.warning) {
-                log(`⚠️  VERSION COMPATIBILITY ISSUE: ${versionCheck.warning}`);
-                this.showVersionWarningToUser(versionCheck);
-            }
-
-            // Log version information for debugging
-            this.logVersionDetails(versionCheck);
-
-            // Determine if we should skip MCP due to version mismatch
-            const shouldSkipMCP = !versionCheck.compatible && 
-                                  this.shouldPreferCLIOnVersionMismatch() &&
-                                  versionCheck.cliVersion !== null;
-
-            if (shouldSkipMCP) {
-                log(`🔄 FALLBACK: Skipping MCP due to version mismatch and user preference for CLI (CLI: ${versionCheck.cliVersion}, MCP: ${versionCheck.mcpVersion})`);
-            }
-
-            // Try MCP client first if available, compatible, and not skipped
-            if (!shouldSkipMCP && await this.isMCPServerAvailable()) {
+            // Try MCP client first if available
+            if (await this.isMCPServerAvailable()) {
                 try {
                     const currentTag = this.tagManager.getCurrentTag();
                     log(`Using MCP client to get tasks for tag: ${currentTag}`);
@@ -1375,39 +1356,14 @@ export class TaskMasterClient {
         }
     }
 
-    /**
-     * Get version check interval from configuration
-     */
-    private getVersionCheckInterval(): number {
-        try {
-            const vscode = require('vscode');
-            const config = vscode.workspace.getConfiguration('claudeTaskMaster');
-            return config.get('versionCheckInterval', 300000); // Default 5 minutes
-        } catch (error) {
-            return 300000; // Default 5 minutes if VS Code API not available
-        }
-    }
-
-    /**
-     * Check if CLI should be preferred over MCP on version mismatch
-     */
-    private shouldPreferCLIOnVersionMismatch(): boolean {
-        try {
-            const vscode = require('vscode');
-            const config = vscode.workspace.getConfiguration('claudeTaskMaster');
-            return config.get('preferCLIOnVersionMismatch', true);
-        } catch (error) {
-            return true; // Default to preferring CLI if VS Code API not available
-        }
-    }
 
     /**
      * Check if task-master command is available and get version (with caching)
      */
     private async isTaskMasterInstalled(): Promise<boolean> {
-        // Return cached result if available and recent (cache based on config)
+        // Return cached result if available and recent (5 minutes cache)
         const now = Date.now();
-        const cacheInterval = this.getVersionCheckInterval();
+        const cacheInterval = 300000; // 5 minutes
         if (this.taskMasterInstalled !== null && (now - this.versionCheckTimestamp) < cacheInterval) {
             return this.taskMasterInstalled;
         }
@@ -1532,64 +1488,6 @@ export class TaskMasterClient {
     }
 
 
-    /**
-     * Log detailed version information for debugging
-     */
-    private logVersionDetails(versionCheck: { 
-        compatible: boolean; 
-        cliVersion: string | null; 
-        mcpVersion: string | null; 
-        warning?: string 
-    }): void {
-        log(`📊 VERSION INFO:`);
-        log(`   - CLI Version: ${versionCheck.cliVersion || 'Not available'}`);
-        log(`   - MCP Version: ${versionCheck.mcpVersion || 'Not available'}`);
-        log(`   - Compatible: ${versionCheck.compatible ? '✅' : '❌'}`);
-        log(`   - Prefer CLI on mismatch: ${this.shouldPreferCLIOnVersionMismatch() ? '✅' : '❌'}`);
-        
-        if (versionCheck.warning) {
-            log(`   - Warning: ${versionCheck.warning}`);
-        }
-    }
-
-    /**
-     * Show version warning to user via VS Code notification
-     */
-    private showVersionWarningToUser(versionCheck: { 
-        compatible: boolean; 
-        cliVersion: string | null; 
-        mcpVersion: string | null; 
-        warning?: string 
-    }): void {
-        try {
-            const vscode = require('vscode');
-            
-            if (!versionCheck.compatible && versionCheck.warning) {
-                const message = `Task Master Version Mismatch: ${versionCheck.warning}`;
-                const actions = ['Update CLI', 'Use CLI Only', 'Ignore'];
-                
-                vscode.window.showWarningMessage(message, ...actions).then((selection: string) => {
-                    switch (selection) {
-                        case 'Update CLI':
-                            vscode.env.openExternal(vscode.Uri.parse('https://www.npmjs.com/package/task-master-ai'));
-                            break;
-                        case 'Use CLI Only':
-                            const config = vscode.workspace.getConfiguration('claudeTaskMaster');
-                            config.update('disableMCP', true, vscode.ConfigurationTarget.Workspace);
-                            vscode.window.showInformationMessage('MCP disabled for this workspace. Restart VS Code to apply changes.');
-                            break;
-                        case 'Ignore':
-                            // User chose to ignore
-                            break;
-                    }
-                });
-                
-                log(`🔔 Showed version warning notification to user: ${message}`);
-            }
-        } catch (error) {
-            log(`Could not show version warning to user: ${error}`);
-        }
-    }
 
     /**
      * Log operation results with version context
@@ -1611,75 +1509,18 @@ export class TaskMasterClient {
     }
 
     /**
-     * Check if there's a version mismatch between CLI and MCP that could cause issues
+     * Get version information for CLI and MCP (always returns compatible)
      */
-    async checkVersionCompatibility(): Promise<{ 
-        compatible: boolean; 
-        cliVersion: string | null; 
-        mcpVersion: string | null; 
-        warning?: string 
+    async checkVersionCompatibility(): Promise<{
+        compatible: boolean;
+        cliVersion: string | null;
+        mcpVersion: string | null;
+        warning?: string
     }> {
         const cliVersion = await this.getCLIVersion();
         const mcpVersion = await this.getMCPVersion();
-        
-        // If we can't get versions, assume compatible but warn
-        if (!cliVersion && !mcpVersion) {
-            return {
-                compatible: true,
-                cliVersion: null,
-                mcpVersion: null,
-                warning: 'Unable to determine version compatibility - both CLI and MCP unavailable'
-            };
-        }
 
-        if (!cliVersion) {
-            return {
-                compatible: true,
-                cliVersion: null,
-                mcpVersion,
-                warning: 'CLI not available, using MCP only'
-            };
-        }
-
-        if (!mcpVersion) {
-            return {
-                compatible: true,
-                cliVersion,
-                mcpVersion: null,
-                warning: 'MCP not available, using CLI only'
-            };
-        }
-
-        // Simple version comparison (assumes semver format)
-        const parseCLIVersion = (v: string) => {
-            const match = v.match(/(\d+)\.(\d+)\.(\d+)/);
-            return match ? [parseInt(match[1]!), parseInt(match[2]!), parseInt(match[3]!)] : [0, 0, 0];
-        };
-
-        const cliVersionParts = parseCLIVersion(cliVersion);
-        const mcpVersionParts = parseCLIVersion(mcpVersion);
-
-        // Check for major version differences
-        if (cliVersionParts[0] !== mcpVersionParts[0]) {
-            return {
-                compatible: false,
-                cliVersion,
-                mcpVersion,
-                warning: `Major version mismatch: CLI v${cliVersion} vs MCP v${mcpVersion}. This may cause data inconsistencies.`
-            };
-        }
-
-        // Check for minor version differences (relaxed to support wider version range)
-        // Allow up to 20 minor version difference to support 0.17.0 to 0.31.0+ compatibility
-        if (Math.abs(cliVersionParts[1]! - mcpVersionParts[1]!) > 20) {
-            return {
-                compatible: false,
-                cliVersion,
-                mcpVersion,
-                warning: `Significant version difference: CLI v${cliVersion} vs MCP v${mcpVersion}. Consider updating both to the same version.`
-            };
-        }
-
+        // Always return compatible, version information is kept for logging purposes only
         return {
             compatible: true,
             cliVersion,

@@ -271,3 +271,7 @@ logger.error('Failed to load tasks', error);
 5. 测试 .vsix 文件安装
 6. 发布到市场：`vsce publish`（需要 token）
 7. 推送标签：`git push --tags`
+
+## Task Master AI Instructions
+**Import Task Master's development workflow commands and guidelines, treat as if import is in the main CLAUDE.md file.**
+@./.taskmaster/CLAUDE.md
